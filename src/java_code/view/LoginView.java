@@ -1,6 +1,5 @@
 package java_code.view;
 
-import java_code.controller.Controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -8,8 +7,6 @@ import javafx.scene.control.TextField;
 import java.io.IOException;
 
 public class LoginView {
-
-    Controller controller;
 
     @FXML
     TextField usernameField;
@@ -24,7 +21,6 @@ public class LoginView {
     @FXML
     protected void initialize(){
 
-        controller = SeatDApplication.getController();
         SeatDApplication.setWindowSize(600, 390);
         errorText.setVisible(false);
 
@@ -39,6 +35,20 @@ public class LoginView {
         if(!usernameField.getText().equals("") && !passwordField.getText().equals("")){
 
             errorText.setVisible(false);
+            if(usernameField.getText().equals("manager") && usernameField.getText().equals("manager")) {
+
+                try {
+                    SeatDApplication.getCoordinator().showManagerScene();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }else{
+
+                errorText.setText("***invalid credentials***");
+                errorText.setVisible(true);
+
+            }
 
         }else{
 

@@ -10,8 +10,10 @@ public class SeatDApplication extends Application {
 
     private static SceneCoordinator coordinator;
     private static Stage Window;
+
+    //Constants
     final private static int defaultWidth = 600;
-    final private static int defaultHeight = 800;
+    final private static int defaultHeight = 500;
 
     public static void main(String[] args) {
         launch(args);
