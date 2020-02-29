@@ -10,20 +10,23 @@ public class SeatDApplication extends Application {
 
     private static SceneCoordinator coordinator;
     private static Stage Window;
+    final private static int defaultWidth = 600;
+    final private static int defaultHeight = 800;
 
     public static void main(String[] args) {
         launch(args);
     }
 
+    /**
+     * Initializes the window and loads the main venue scene.
+     * @param primaryStage
+     */
     @Override
     public void start(Stage primaryStage) {
 
-
-
         Window = primaryStage;
         Window.setTitle("SeatD");
-        Window.setWidth(600);
-        Window.setHeight(800);
+        setToDefaultWindowSize();
         Window.show();
         Window.setResizable(false);
 
@@ -49,11 +52,21 @@ public class SeatDApplication extends Application {
      */
     public static SceneCoordinator getCoordinator(){return coordinator;}
 
-    public static void setWindowSize(double width, double height){
+    /**
+     * Changes the window dimensions.
+     * @param width
+     * @param height
+     */
+    public static void setWindowSize(int width, int height){
 
         Window.setWidth(width);
         Window.setHeight(height);
 
     }
+
+    /**
+     * Changes the window dimensions to the default size.
+     */
+    public static void setToDefaultWindowSize(){ setWindowSize(defaultWidth, defaultHeight);}
 
 }

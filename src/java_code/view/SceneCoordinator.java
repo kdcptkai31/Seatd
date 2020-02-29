@@ -43,4 +43,24 @@ public class SceneCoordinator {
 
     }
 
+    /**
+     * Loads the login scene into the main window.
+     * @throws IOException
+     */
+    public void showLoginScene() throws IOException {
+
+        window.setScene(new Scene(FXMLLoader.load(new File("src/resources/layout/login.fxml").toURL())));
+
+    }
+
+    /**
+     * Loads the login scene into the main window.
+     * @throws IOException
+     */
+    public void showManagerScene() throws IOException {
+
+        window.setScene(new Scene(FXMLLoader.load(new File("src/resources/layout/manager.fxml").toURL())));
+
+    }
+
 }
