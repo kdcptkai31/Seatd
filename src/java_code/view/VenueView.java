@@ -3,7 +3,6 @@ package java_code.view;
 import java_code.controller.Controller;
 import java_code.model.Patron;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -14,21 +13,19 @@ public class VenueView {
 
     Controller controller;
     @FXML
-    Button loginButton;
+    private Label venueNameLabel;
     @FXML
-    Label venueNameLabel;
+    private Label venueTypeLabel;
     @FXML
-    Label venueTypeLabel;
+    private Label waitTimeLabel;
     @FXML
-    Label waitTimeLabel;
+    private Label waitlistSize;
     @FXML
-    Label waitlistSize;
+    private TextField nameField;
     @FXML
-    TextField nameField;
+    private TextField emailField;
     @FXML
-    TextField emailField;
-    @FXML
-    Label errorText;
+    private Label errorText;
 
     /**
      * Initializes the scene.
@@ -38,11 +35,20 @@ public class VenueView {
 
         controller = SeatDApplication.getController();
         SeatDApplication.setToDefaultWindowSize();
+        refresh();
+        errorText.setVisible(false);
+
+    }
+
+    /**
+     * Refreshes the scene with the most current data.
+     */
+    public void refresh(){
+
         venueNameLabel.setText(controller.venueName);
         venueTypeLabel.setText(controller.venueType);
         waitTimeLabel.setText(Integer.toString(controller.waitlist.size() * controller.waitPerPatron));
         waitlistSize.setText(Integer.toString(controller.waitlist.size()));
-        errorText.setVisible(false);
 
     }
 
