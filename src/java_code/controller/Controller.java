@@ -2,16 +2,17 @@ package java_code.controller;
 
 import java_code.model.Patron;
 
-import java.util.Vector;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 /**
- * Holds local information, will be removed once the server is working fully and correctly.
+ * Holds local information, will be removed once the server is working fully and correctly. Represents a single venue.
  */
 public class Controller {
 
     public String venueName;
     public String venueType;
-    public Vector<Patron> waitlist;
+    public BlockingQueue<Patron> waitlist;  //This is thread safe
     public int waitPerPatron;
 
     /**
@@ -21,7 +22,7 @@ public class Controller {
 
         venueName = "FRYING NEMO";
         venueType = "Fish and Chips";
-        waitlist = new Vector<>();
+        waitlist = new ArrayBlockingQueue<Patron>(100); //This is thread safe
         waitPerPatron = 15;
 
 
