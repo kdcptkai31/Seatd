@@ -15,6 +15,13 @@ public class Patron {
 
     }
 
+    /**
+     * Returns the name and email of the patron in an organized way.
+     * @return
+     */
+    @Override
+    public String toString(){return name.concat(" | ".concat(email));}
+
     //Getters
     public String getName(){return name;}
     public String getEmail(){return email;}

@@ -9,11 +9,11 @@ import java.io.IOException;
 public class LoginView {
 
     @FXML
-    TextField usernameField;
+    private TextField usernameField;
     @FXML
-    TextField passwordField;
+    private TextField passwordField;
     @FXML
-    Label errorText;
+    private Label errorText;
 
     /**
      * Initializes the scene.
