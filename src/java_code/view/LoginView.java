@@ -46,6 +46,8 @@ public class LoginView {
             }else{
 
                 errorText.setText("***invalid credentials***");
+                usernameField.clear();
+                passwordField.clear();
                 errorText.setVisible(true);
 
             }
