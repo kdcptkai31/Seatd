@@ -30,13 +30,13 @@
             </VBox>
             <Button fx:id="loginButton" mnemonicParsing="false" onMouseClicked="#onLoginClicked" text="Admin Login" textAlignment="CENTER">
                <HBox.margin>
-                  <Insets left="115.0" />
+                  <Insets left="100.0" />
                </HBox.margin></Button>
          </children>
       </HBox>
    </top>
    <center>
-      <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+      <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="600.0" spacing="5.0" BorderPane.alignment="CENTER">
          <children>
             <HBox alignment="CENTER" prefHeight="20.0" prefWidth="600.0" spacing="5.0">
                <children>
@@ -50,7 +50,7 @@
                   <Label fx:id="waitlistSize" text="sample text" />
                </children>
                <VBox.margin>
-                  <Insets />
+                  <Insets top="-5.0" />
                </VBox.margin>
             </HBox>
             <HBox alignment="CENTER" prefHeight="30.0" prefWidth="600.0" spacing="5.0">
@@ -59,7 +59,7 @@
                   <TextField fx:id="nameField" />
                </children>
                <VBox.margin>
-                  <Insets top="20.0" />
+                  <Insets top="10.0" />
                </VBox.margin>
             </HBox>
             <HBox alignment="CENTER" prefHeight="30.0" prefWidth="600.0" spacing="5.0">
