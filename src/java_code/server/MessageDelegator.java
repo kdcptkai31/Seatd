@@ -58,14 +58,20 @@ public class MessageDelegator extends SubscribeCallback {
     @Override
     public void presence(@NotNull PubNub pubNub, @NotNull PNPresenceEventResult presence) {
 
-//        if (presence.getEvent().equals("join")) {
-//            System.out.println("Player joined");
-//            System.out.println(presence.getUuid());
-//            presence.getHereNowRefresh();
-//            presence.getUuid(); // 175c2c67-b2a9-470d-8f4b-1db94f90e39e
-//            presence.getTimestamp(); // 1345546797
-//            presence.getOccupancy(); // 2
-//        }
+        if (presence.getEvent().equals("join")) {
+
+            if(presence.getOccupancy().equals(1))
+                System.out.println("Server ID: ".concat(presence.getUuid()));
+            else
+                System.out.println("User: ".concat(presence.getUuid()).concat(" connected"));
+
+
+        }
+        else if(presence.getEvent().equals("leave")){
+
+            System.out.println("User: ".concat(presence.getUuid()).concat(" disconnected"));
+
+        }
 
     }
 

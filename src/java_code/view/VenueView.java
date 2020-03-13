@@ -1,6 +1,7 @@
 package java_code.view;
 
 import java_code.controller.Controller;
+import java_code.controller.ServerConnection;
 import java_code.model.Patron;
 import javafx.fxml.FXML;
 
@@ -12,6 +13,7 @@ import java.io.IOException;
 public class VenueView {
 
     Controller controller;
+    ServerConnection conn;
     @FXML
     private Label venueNameLabel;
     @FXML
@@ -33,6 +35,7 @@ public class VenueView {
     @FXML
     protected void initialize(){
 
+        conn = ServerConnection.getInstance();
         controller = SeatDApplication.getController();
         SeatDApplication.setToDefaultWindowSize();
         refresh();

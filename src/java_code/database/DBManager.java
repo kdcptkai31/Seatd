@@ -17,7 +17,7 @@ public class DBManager {
     public static ManagerAccount getManagerAccountByUsername(String username){
 
         //Parse db for the manager account
-        return new ManagerAccount();
+        return new ManagerAccount("manager", "manager");//Dummy login info
 
     }
 

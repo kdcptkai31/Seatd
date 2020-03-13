@@ -2,6 +2,7 @@ package java_code.view;
 
 import java_code.controller.Controller;
 
+import java_code.controller.ServerConnection;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,6 +15,7 @@ import java.io.IOException;
 public class ManagerView {
 
     Controller controller;
+    ServerConnection conn;
 
     @FXML
     private ListView<String> waitlistView;
@@ -30,6 +32,7 @@ public class ManagerView {
     @FXML
     protected void initialize(){
 
+        conn = ServerConnection.getInstance();
         controller = SeatDApplication.getController();
         SeatDApplication.setToDefaultWindowSize();
         refreshPage();
@@ -87,6 +90,7 @@ public class ManagerView {
 
         try {
             SeatDApplication.getCoordinator().showVenueScene();
+            conn.getLoggedInObservable().set(false);
         } catch (IOException e) {
             e.printStackTrace();
         }

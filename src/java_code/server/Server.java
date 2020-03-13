@@ -2,6 +2,7 @@ package java_code.server;
 
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
+import java_code.server.handlers.ConnectHandler;
 import java_code.server.handlers.ServerLoginHandler;
 
 import java.util.Arrays;
@@ -13,8 +14,8 @@ import java.util.HashMap;
  */
 public class Server {
 
-    private String pubKey = System.getenv("PUBNUB_PUBLISH");
-    private String subKey = System.getenv("PUBNUB_SUBSCRIBE");
+    private static String pubKey = "pub-c-01d2cd3b-e3bb-4881-a9ac-e896e0476911";
+    private static String subKey = "sub-c-d3b9c360-5fee-11ea-b7ea-f2f107c29c38";
     private PubNub pubnub;
     private PNConfiguration pnConfiguration;
     private MessageDelegator delegator;
@@ -34,6 +35,7 @@ public class Server {
 
     public void start(){
 
+        delegator.addHandler("connect", new ConnectHandler(this));
         delegator.addHandler("login", new ServerLoginHandler(this));
         pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
 
