@@ -2,7 +2,6 @@ package java_code.server;
 
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
-import java_code.server.handlers.ConnectHandler;
 import java_code.server.handlers.ServerLoginHandler;
 
 import java.util.Arrays;
@@ -35,7 +34,6 @@ public class Server {
 
     public void start(){
 
-        delegator.addHandler("connect", new ConnectHandler(this));
         delegator.addHandler("login", new ServerLoginHandler(this));
         pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
 

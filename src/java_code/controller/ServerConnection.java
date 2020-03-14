@@ -48,7 +48,6 @@ public class ServerConnection {
         pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
 
         waitForServerPub();
-        connect();
         registerLoginStatusListener();
 
 
@@ -134,27 +133,6 @@ public class ServerConnection {
 
         this.pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
 
-    }
-
-    /**
-     * Sends the "connect" message
-     */
-    private void connect() {
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "connect");
-        JsonObject data = new JsonObject();
-        data.addProperty("newUser", "");
-
-        msg.add("data", data);
-
-        try {
-            this.pubnub.publish()
-                    .channel("main")
-                    .message(msg)
-                    .sync();
-        } catch (PubNubException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
