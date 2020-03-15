@@ -2,6 +2,7 @@ package java_code.server;
 
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
+import java_code.database.DBManager;
 import java_code.server.handlers.ServerLoginHandler;
 
 import java.util.Arrays;
@@ -19,10 +20,13 @@ public class Server {
     private PNConfiguration pnConfiguration;
     private MessageDelegator delegator;
     private HashMap<String, String> users;
+    private DBManager dbManager;
 
+    /**
+     * Constructor
+     */
     public Server(){
 
-        users = new HashMap<>();
         pnConfiguration = new PNConfiguration();
         pnConfiguration.setPublishKey(pubKey);
         pnConfiguration.setSubscribeKey(subKey);
@@ -30,8 +34,14 @@ public class Server {
         delegator = new MessageDelegator();
         pubnub.addListener(delegator);
 
+        users = new HashMap<>();
+        dbManager = new DBManager();
+
     }
 
+    /**
+     * Registers the message handlers and subscribes to the pubnub channel.
+     */
     public void start(){
 
         delegator.addHandler("login", new ServerLoginHandler(this));
@@ -39,14 +49,17 @@ public class Server {
 
     }
 
-    public void addUser(String uuid, String username){
-        users.put(uuid, username);
-    }
-    public void removeUser(String uuid){
-        users.remove(uuid);
-    }
-    public String findUser(String uuid){
-        return users.get(uuid);
-    }
+    /**
+     * Adds a currently running client's uuid to send specific messages to them.
+     * @param uuid
+     * @param username
+     */
+    public void addUser(String uuid, String username){users.put(uuid, username);}
+
+    /**
+     * Removes a client's uuid when they close the application.
+     * @param uuid
+     */
+    public void removeUser(String uuid){users.remove(uuid);}
 
 }
