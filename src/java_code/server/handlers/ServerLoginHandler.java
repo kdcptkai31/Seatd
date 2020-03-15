@@ -21,8 +21,8 @@ public class ServerLoginHandler implements MessageHandler {
         String password = data.get("password").getAsString();
 
 
-        ManagerAccount player = DBManager.getManagerAccountByUsername(username);
-        if (player == null || !player.checkPassword(password)) {
+        ManagerAccount manager = DBManager.getManagerAccountByUsername(username);
+        if (manager.equals(null) || !manager.checkPassword(password)) {
             sendBadLogin(pubnub, username);
             return;
         }
@@ -45,6 +45,7 @@ public class ServerLoginHandler implements MessageHandler {
                     .channel("main")
                     .message(msg)
                     .sync();
+            System.out.println(username.concat(" logged in"));
         } catch (PubNubException e) {
             e.printStackTrace();
         }
@@ -63,6 +64,7 @@ public class ServerLoginHandler implements MessageHandler {
                     .channel("main")
                     .message(msg)
                     .sync();
+            System.out.println(username.concat(" tried to log in and failed"));
         } catch (PubNubException e) {
             e.printStackTrace();
         }

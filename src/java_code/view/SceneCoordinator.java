@@ -63,4 +63,9 @@ public class SceneCoordinator {
 
     }
 
+    /**
+     * Closes the application.
+     */
+    public void onExitRequested(){System.exit(0);}
+
 }

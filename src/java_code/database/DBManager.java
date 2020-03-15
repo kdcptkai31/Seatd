@@ -17,6 +17,7 @@ public class DBManager {
     public DBManager(){
 
         checkIfDatabaseExists();
+        //insertDefaultDatabaseInformation()---dummy data for the project
 
     }
 
@@ -96,6 +97,8 @@ public class DBManager {
 
         //Parse db for the manager account
         return new ManagerAccount("manager", "manager");//Dummy login info
+
+        //If the username does not exist, return null
 
     }
 

@@ -222,10 +222,6 @@ public class ServerConnection {
         }
     }
 
-    public Observable<Boolean> getLoggedInObservable() {
-        return loggedIn;
-    }
-
     /**
      * Runs whenever someone joins or leaves the "main" pubnub channel.
      */
@@ -254,6 +250,14 @@ public class ServerConnection {
                 });
 
     }
+
+    //Getters
+    public Observable<Boolean> getLoggedInObservable() {
+        return loggedIn;
+    }
+
+    //Setters
+    public void setAttemptedUsername(String str){attemptedUsername = str;}
 
 
 }

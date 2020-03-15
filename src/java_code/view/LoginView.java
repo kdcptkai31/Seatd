@@ -57,6 +57,7 @@ public class LoginView {
     public void onLoginClicked(){
 
         if(!usernameField.getText().equals("") && !passwordField.getText().equals("")){
+            conn.setAttemptedUsername(usernameField.getText());
             conn.login(usernameField.getText(), passwordField.getText());
             errorText.setVisible(false);
 

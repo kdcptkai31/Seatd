@@ -1,6 +1,5 @@
 package java_code.model;
 
-
 /**
  * Represents a manager account object.
  */
@@ -19,10 +18,6 @@ public class ManagerAccount {
 
     }
 
-    public boolean checkPassword(String password){
-
-        return this.password.equals(password);
-
-    }
+    public boolean checkPassword(String password){return this.password.equals(password);}
 
 }

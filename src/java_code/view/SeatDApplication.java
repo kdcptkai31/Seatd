@@ -71,4 +71,10 @@ public class SeatDApplication extends Application {
      */
     public static void setToDefaultWindowSize(){ setWindowSize(defaultWidth, defaultHeight);}
 
+    /**
+     * Closes the application on window closure.
+     */
+    @Override
+    public void stop(){coordinator.onExitRequested();}
+
 }
