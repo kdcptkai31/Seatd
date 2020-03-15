@@ -22,7 +22,7 @@ public class ServerLoginHandler implements MessageHandler {
 
 
         ManagerAccount manager = DBManager.getManagerAccountByUsername(username);
-        if (manager.equals(null) || !manager.checkPassword(password)) {
+        if (manager == null || !manager.checkPassword(password)) {
             sendBadLogin(pubnub, username);
             return;
         }

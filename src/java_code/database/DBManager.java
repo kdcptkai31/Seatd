@@ -2,10 +2,7 @@ package java_code.database;
 
 import java_code.model.ManagerAccount;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 /**
  * Manages the server's access to the main SeatD database.
@@ -61,8 +58,8 @@ public class DBManager {
                 + "    manager_id INTEGER PRIMARY KEY,\n"
                 + "    username TEXT NOT NULL,\n"
                 + "    password TEXT NOT NULL,\n"
-                + "    venue_id INTEGER NOT NULL UNIQUE,\n"
-                + "    FOREIGN KEY (venue_id) REFERENCES venue (id) ON DELETE SET NULL"
+                + "    venue_id INTEGER NOT NULL UNIQUE\n"
+                //+ "    ,FOREIGN KEY (venue_id) REFERENCES venue (id) ON DELETE SET NULL"
                 + ");";
 
         try {
@@ -91,14 +88,26 @@ public class DBManager {
     /**
      *
      * @param username
-     * @return the ManagerAccount object to the corresponding username
+     * @return the ManagerAccount object to the corresponding username. Returns null if it does not exist.
      */
     public static ManagerAccount getManagerAccountByUsername(String username){
 
-        //Parse db for the manager account
-        return new ManagerAccount("manager", "manager");//Dummy login info
+        String sql = "SELECT username, password FROM manager_account m WHERE m.username = ?";
 
-        //If the username does not exist, return null
+        try {
+
+            PreparedStatement stmt  = connection.prepareStatement(sql);
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next()){
+                return new ManagerAccount(rs.getString("username"), rs.getString("password"));
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
 
     }
 
