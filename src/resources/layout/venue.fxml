@@ -40,8 +40,14 @@
          <children>
             <HBox alignment="CENTER" prefHeight="20.0" prefWidth="600.0" spacing="5.0">
                <children>
-                  <Label text="Current Wait Time:" />
-                  <Label fx:id="waitTimeLabel" text="sample text" />
+                  <Label text="Current Wait Time:">
+                     <font>
+                        <Font name="System Bold" size="15.0" />
+                     </font></Label>
+                  <Label fx:id="waitTimeLabel" text="sample text">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font></Label>
                </children>
             </HBox>
             <HBox alignment="CENTER" prefHeight="20.0" prefWidth="600.0" spacing="5.0">
