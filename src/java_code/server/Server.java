@@ -1,12 +1,13 @@
 package java_code.server;
 
+import com.google.gson.JsonObject;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
+import com.pubnub.api.PubNubException;
 import java_code.database.DBManager;
 import java_code.server.handlers.ServerLoginHandler;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * The running server. Will handle the delegation of all incoming messages by sending them to the correct handler, where
@@ -21,6 +22,8 @@ public class Server {
     private MessageDelegator delegator;
     private HashMap<String, String> users;
     private DBManager dbManager;
+    private Vector<Integer> currentVenueWaits; //Represents the waittime for each venue, mod 15.
+    private Timer timer;
 
     /**
      * Constructor
@@ -36,6 +39,13 @@ public class Server {
 
         users = new HashMap<>();
         dbManager = new DBManager();
+        //initialize venue wait times
+        currentVenueWaits = new Vector<>();
+        int tmp = dbManager.getVenueCount();
+        for(int i = 0; i < tmp; i++)
+            currentVenueWaits.add(0);
+
+        timer = new Timer();
 
     }
 
@@ -46,6 +56,96 @@ public class Server {
 
         delegator.addHandler("login", new ServerLoginHandler(this));
         pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
+        startClock();
+
+    }
+
+    /**
+     * Sends a message every 60 seconds to all clients with an updated waitlist time for each venue.
+     */
+    private void startClock(){
+
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+
+                JsonObject msg = new JsonObject();
+                msg.addProperty("type", "clockTick");
+
+                JsonObject data = new JsonObject();
+                data.addProperty("", "");
+
+                updateCurrentVenueWaits();
+
+                for(int i = 0; i < currentVenueWaits.size(); i ++)
+                    data.addProperty(String.valueOf(i), String.valueOf(currentVenueWaits.elementAt(i)));
+
+                msg.add("data", data);
+
+                try {
+                    pubnub.publish()
+                            .channel("main")
+                            .message(msg)
+                            .sync();
+                } catch (PubNubException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, 1000, 5000);
+
+
+    }
+
+    /**
+     * Updates the data structure with the current wait time for each venue.
+     */
+    private void updateCurrentVenueWaits(){
+
+        Vector<Integer> waitlistSizes = dbManager.getAllWaitlistSizes();
+        Vector<Integer> waitPerPatrons = dbManager.getAllWaitPerPatrons();
+        if(waitlistSizes == null || waitPerPatrons == null)
+            return;
+
+        for(int i = 0; i < waitlistSizes.size(); i++)
+            currentVenueWaits.setElementAt((currentVenueWaits.get(i) % waitPerPatrons.get(i)) +
+                                                (waitlistSizes.get(i) * waitPerPatrons.get(i)), i);
+
+        for(int i = 0; i < currentVenueWaits.size(); i++)
+            System.out.println(currentVenueWaits.get(i));
+        System.out.println("---------");
+
+        /*
+        *Decrements each waittime value in the data structure by 1, representing a minute passing on the clock.
+        * If a waittime hits it's wait per patron value,(example: waitperpatron = 10, clock hits 20, 10, etc), the
+        * person on the top of that venue's waitlist is removed and "served", updating the waitlist.
+         */
+
+        for(int i = 0; i < currentVenueWaits.size(); i++){
+
+            if(waitlistSizes.get(i) != 0){
+
+                if(currentVenueWaits.get(i) % waitPerPatrons.get(i) == 0)
+                    serveVenuePatron(i);
+
+                if(currentVenueWaits.get(i) != 0)
+                    currentVenueWaits.setElementAt(currentVenueWaits.get(i) - 1 ,i);
+
+            }
+
+        }
+
+    }
+
+    /**
+     * Removes the patron on the top of the waitlist for the given venueID and sends them an email.
+     * @param venueID
+     */
+    private void serveVenuePatron(int venueID){
+
+        //Send email to this person, THEN execute the statement below
+        dbManager.servePatron(venueID);
+
 
     }
 

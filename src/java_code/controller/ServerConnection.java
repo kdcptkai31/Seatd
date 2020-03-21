@@ -255,6 +255,7 @@ public class ServerConnection {
     public Observable<Boolean> getLoggedInObservable() {
         return loggedIn;
     }
+    public PubNub getPubNub(){return pubnub;}
 
     //Setters
     public void setAttemptedUsername(String str){attemptedUsername = str;}
