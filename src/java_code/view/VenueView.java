@@ -1,5 +1,8 @@
 package java_code.view;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.callbacks.SubscribeCallback;
@@ -22,6 +25,9 @@ import javafx.scene.control.TextField;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
 public class VenueView {
 
@@ -43,6 +49,7 @@ public class VenueView {
     private Label errorText;
 
     private int selectedVenue;
+    private String attemptedWaitlistAdd;
 
     /**
      * Initializes the scene.
@@ -56,10 +63,13 @@ public class VenueView {
         refresh();
         errorText.setVisible(false);
 
-        //SET SELECTED VENUE BASED ON WHAT THEY CLICKED TO GET HERE, THIS IS A PLACEHOLDER
+        //SET SELECTED VENUE BASED ON WHAT THEY CLICKED TO GET HERE, THIS IS A PLACEHOLDER*********************
         selectedVenue = 0;
 
+        attemptedWaitlistAdd = "";
+
         registerWaitlistTimeListener();
+        registerWaitlistAddListener();
 
     }
 
@@ -96,9 +106,11 @@ public class VenueView {
         if(!nameField.getText().equals("") && !emailField.getText().equals("")){
 
             try{
+
                 errorText.setVisible(false);
-                controller.waitlist.put(new Patron(nameField.getText(), emailField.getText()));
-                SeatDApplication.getCoordinator().showVenueScene();
+                attemptedWaitlistAdd = nameField.getText();
+                conn.addToWaitlist(selectedVenue, new Patron(nameField.getText(), emailField.getText()));
+
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -125,44 +137,88 @@ public class VenueView {
             public void message(@NotNull PubNub pubnub, @NotNull PNMessageResult message) {
 
                 String type = message.getMessage().getAsJsonObject().get("type").getAsString();//Message type
-                JsonObject data = message.getMessage().getAsJsonObject().get("data").getAsJsonObject();
-
                 if(type.equals("clockTick")){
 
+                    JsonArray data = message.getMessage().getAsJsonObject().get("data").getAsJsonObject().get("data").
+                                     getAsJsonArray();
+                    Iterator<JsonElement> it = data.iterator();
+                    ArrayList<Integer> waitlistTimes = new ArrayList<>();
+                    while(it.hasNext()){
+                        JsonElement ele = it.next();
+                        waitlistTimes.add(ele.getAsInt());
+                    }
+
+                    System.out.println(waitlistTimes.get(selectedVenue));
+
                     Platform.runLater(() -> {
-                        System.out.println("Waittime received: ".concat(data.get(String.valueOf(selectedVenue)).getAsString()));
-                        waitTimeLabel.setText(data.get(String.valueOf(selectedVenue)).getAsString());
+                        waitTimeLabel.setText(Integer.toString(waitlistTimes.get(selectedVenue)));
                     });
-
-
 
                 }
 
-            }
-            @Override
-            public void presence(@NotNull PubNub pubnub, @NotNull PNPresenceEventResult pnPresenceEventResult) {
 
             }
             @Override
-            public void signal(@NotNull PubNub pubnub, @NotNull PNSignalResult pnSignalResult) {
+            public void presence(@NotNull PubNub pubnub, @NotNull PNPresenceEventResult pnPresenceEventResult) {}
+            @Override
+            public void signal(@NotNull PubNub pubnub, @NotNull PNSignalResult pnSignalResult) {}
+            @Override
+            public void user(@NotNull PubNub pubnub, @NotNull PNUserResult pnUserResult) {}
+            @Override
+            public void space(@NotNull PubNub pubnub, @NotNull PNSpaceResult pnSpaceResult) {}
+            @Override
+            public void membership(@NotNull PubNub pubnub, @NotNull PNMembershipResult pnMembershipResult) {}
+            @Override
+            public void messageAction(@NotNull PubNub pubnub, @NotNull PNMessageActionResult pnMessageActionResult) {}
+        });
+
+    }
+
+    public void registerWaitlistAddListener(){
+
+        conn.getPubNub().addListener(new SubscribeCallback() {
+            @Override
+            public void status(@NotNull PubNub pubnub, @NotNull PNStatus pnStatus) {}
+            @Override
+            public void message(@NotNull PubNub pubnub, @NotNull PNMessageResult message) {
+
+                String type = message.getMessage().getAsJsonObject().get("type").getAsString();//Message type
+                JsonObject data = message.getMessage().getAsJsonObject().get("data").getAsJsonObject();
+
+                if (!Arrays.asList("goodWaitlistAdd", "badWaitlistAdd").contains(type)) return;
+
+
+                if(type.equals("goodWaitlistAdd")){
+
+                    attemptedWaitlistAdd = "";
+                    nameField.clear();
+                    emailField.clear();
+                    errorText.setVisible(false);
+
+                }
+                if(type.equals("badWaitlistAdd")){
+
+                    Platform.runLater(() -> {
+                        errorText.setText("***error-waitlist addition failed***");
+                        errorText.setVisible(true);
+                    });
+
+                }
+
 
             }
             @Override
-            public void user(@NotNull PubNub pubnub, @NotNull PNUserResult pnUserResult) {
-
-            }
+            public void presence(@NotNull PubNub pubnub, @NotNull PNPresenceEventResult pnPresenceEventResult) {}
             @Override
-            public void space(@NotNull PubNub pubnub, @NotNull PNSpaceResult pnSpaceResult) {
-
-            }
+            public void signal(@NotNull PubNub pubnub, @NotNull PNSignalResult pnSignalResult) {}
             @Override
-            public void membership(@NotNull PubNub pubnub, @NotNull PNMembershipResult pnMembershipResult) {
-
-            }
+            public void user(@NotNull PubNub pubnub, @NotNull PNUserResult pnUserResult) {}
             @Override
-            public void messageAction(@NotNull PubNub pubnub, @NotNull PNMessageActionResult pnMessageActionResult) {
-
-            }
+            public void space(@NotNull PubNub pubnub, @NotNull PNSpaceResult pnSpaceResult) {}
+            @Override
+            public void membership(@NotNull PubNub pubnub, @NotNull PNMembershipResult pnMembershipResult) {}
+            @Override
+            public void messageAction(@NotNull PubNub pubnub, @NotNull PNMessageActionResult pnMessageActionResult) {}
         });
 
     }

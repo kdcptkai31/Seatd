@@ -1,10 +1,13 @@
 package java_code.server;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.PubNubException;
 import java_code.database.DBManager;
+import java_code.model.Patron;
+import java_code.server.handlers.AddWaitlistHandler;
 import java_code.server.handlers.ServerLoginHandler;
 
 import java.util.*;
@@ -55,6 +58,7 @@ public class Server {
     public void start(){
 
         delegator.addHandler("login", new ServerLoginHandler(this));
+        delegator.addHandler("addWaitlist", new AddWaitlistHandler(this));
         pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
         startClock();
 
@@ -69,17 +73,18 @@ public class Server {
             @Override
             public void run() {
 
+                updateCurrentVenueWaits();
+                decrementVenueWaittimes();
+
+                for(int i = 0; i < currentVenueWaits.size(); i++)
+                    System.out.println(currentVenueWaits.get(i));
+                System.out.println("---------");
+
                 JsonObject msg = new JsonObject();
                 msg.addProperty("type", "clockTick");
 
                 JsonObject data = new JsonObject();
-                data.addProperty("", "");
-
-                updateCurrentVenueWaits();
-
-                for(int i = 0; i < currentVenueWaits.size(); i ++)
-                    data.addProperty(String.valueOf(i), String.valueOf(currentVenueWaits.elementAt(i)));
-
+                data.add("data", getJSONArrayFromVector(currentVenueWaits));
                 msg.add("data", data);
 
                 try {
@@ -92,7 +97,7 @@ public class Server {
                 }
 
             }
-        }, 1000, 5000);
+        }, 1000, 60000);
 
 
     }
@@ -100,36 +105,48 @@ public class Server {
     /**
      * Updates the data structure with the current wait time for each venue.
      */
-    private void updateCurrentVenueWaits(){
+    public void updateCurrentVenueWaits(){
 
         Vector<Integer> waitlistSizes = dbManager.getAllWaitlistSizes();
         Vector<Integer> waitPerPatrons = dbManager.getAllWaitPerPatrons();
         if(waitlistSizes == null || waitPerPatrons == null)
             return;
 
-        for(int i = 0; i < waitlistSizes.size(); i++)
-            currentVenueWaits.setElementAt((currentVenueWaits.get(i) % waitPerPatrons.get(i)) +
-                                                (waitlistSizes.get(i) * waitPerPatrons.get(i)), i);
+        for(int i = 0; i < waitlistSizes.size(); i++){
 
-        for(int i = 0; i < currentVenueWaits.size(); i++)
-            System.out.println(currentVenueWaits.get(i));
-        System.out.println("---------");
+            if(currentVenueWaits.get(i) % waitPerPatrons.get(i) == 0)
+                currentVenueWaits.setElementAt((currentVenueWaits.get(i) % waitPerPatrons.get(i))+
+                        waitlistSizes.get(i) *  waitPerPatrons.get(i), i);
+            else
+                currentVenueWaits.setElementAt((currentVenueWaits.get(i) % waitPerPatrons.get(i)) +
+                        ((waitlistSizes.get(i) - 1) * waitPerPatrons.get(i)), i);
 
-        /*
-        *Decrements each waittime value in the data structure by 1, representing a minute passing on the clock.
-        * If a waittime hits it's wait per patron value,(example: waitperpatron = 10, clock hits 20, 10, etc), the
-        * person on the top of that venue's waitlist is removed and "served", updating the waitlist.
-         */
+        }
+
+    }
+
+    /**
+     * Decrements each waittime value in the data structure by 1, representing a minute passing on the clock.
+     * If a waittime hits it's wait per patron value,(example: waitperpatron = 10, clock hits 20, 10, etc), the
+     * person on the top of that venue's waitlist is removed and "served", updating the waitlist.
+     */
+    private void decrementVenueWaittimes(){
+
+        Vector<Integer> waitlistSizes = dbManager.getAllWaitlistSizes();
+        Vector<Integer> waitPerPatrons = dbManager.getAllWaitPerPatrons();
+
+        if(waitlistSizes == null || waitPerPatrons == null)
+            return;
 
         for(int i = 0; i < currentVenueWaits.size(); i++){
 
             if(waitlistSizes.get(i) != 0){
 
-                if(currentVenueWaits.get(i) % waitPerPatrons.get(i) == 0)
-                    serveVenuePatron(i);
-
                 if(currentVenueWaits.get(i) != 0)
                     currentVenueWaits.setElementAt(currentVenueWaits.get(i) - 1 ,i);
+
+                if(currentVenueWaits.get(i) % waitPerPatrons.get(i) == 0)
+                    serveVenuePatron(i);
 
             }
 
@@ -142,12 +159,24 @@ public class Server {
      * @param venueID
      */
     private void serveVenuePatron(int venueID){
-
+        System.out.println("REMOVE WAITLIST");
         //Send email to this person, THEN execute the statement below
         dbManager.servePatron(venueID);
 
 
     }
+
+    public JsonArray getJSONArrayFromVector(Vector<Integer> vector){
+
+        JsonArray array = new JsonArray();
+        for(int i = 0; i < vector.size(); i++)
+            array.add(vector.get(i));
+
+        return array;
+
+    }
+
+    public Vector<Integer> getCurrentVenueWaits(){return currentVenueWaits;}
 
     /**
      * Adds a currently running client's uuid to send specific messages to them.
@@ -155,6 +184,14 @@ public class Server {
      * @param username
      */
     public void addUser(String uuid, String username){users.put(uuid, username);}
+
+    /**
+     * Adds the user to the correct waitlist.
+     * @param venueID
+     * @param patron
+     * @return
+     */
+    public boolean addToWaitlist(int venueID, Patron patron){return dbManager.addToWaitlist(venueID, patron);}
 
     /**
      * Removes a client's uuid when they close the application.

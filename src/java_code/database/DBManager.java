@@ -177,6 +177,32 @@ public class DBManager {
     }
 
     /**
+     * Adds a patron to the venue they are trying to add themselves to.
+     * @param venueID
+     * @param patron
+     * @return true if it is successful, false if not.
+     */
+    public static boolean addToWaitlist(int venueID, Patron patron){
+
+        String sql = "INSERT INTO waitlist(cor_venue_id, user_name, email) VALUES(?, ?, ?)";
+
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, venueID);
+            stmt.setString(2, patron.getName());
+            stmt.setString(3, patron.getEmail());
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+
+    }
+
+    /**
      * Removes the first instance of a patron on the waitlist, effectively "serving" them.
      * @param venueID
      */

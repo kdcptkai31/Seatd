@@ -15,6 +15,7 @@ import com.pubnub.api.models.consumer.pubsub.message_actions.PNMessageActionResu
 import com.pubnub.api.models.consumer.pubsub.objects.PNMembershipResult;
 import com.pubnub.api.models.consumer.pubsub.objects.PNSpaceResult;
 import com.pubnub.api.models.consumer.pubsub.objects.PNUserResult;
+import java_code.model.Patron;
 import java_code.observable.Observable;
 import java_code.server.MessageDelegator;
 import org.jetbrains.annotations.NotNull;
@@ -220,6 +221,33 @@ public class ServerConnection {
         } catch (PubNubException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Sends the "addToWaitlist" message with the venueID, name, and email.
+     * @param venueID
+     * @param patron
+     */
+    public void addToWaitlist(int venueID, Patron patron){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "addWaitlist");
+
+        JsonObject data = new JsonObject();
+        data.addProperty("venueID", venueID);
+        data.addProperty("name", patron.getName());
+        data.addProperty("email", patron.getEmail());
+        msg.add("data", data);
+
+        try {
+            this.pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
