@@ -148,18 +148,15 @@ public class ServerConnection {
                 String type = message.getMessage().getAsJsonObject().get("type").getAsString();//Message type
                 JsonObject data = message.getMessage().getAsJsonObject().get("data").getAsJsonObject();
 
-                if (!Arrays.asList("loggedIn", "badLogin").contains(type)) {
+                if (!Arrays.asList("loggedIn", "badLogin").contains(type))
                     return;
-                }
 
                 String username = data.get("username").getAsString();
-
                 if (type.equals("loggedIn") && username.equals(attemptedUsername)) {
 
                     loggedIn.set(true);
 
                 }
-
 
                 if (type.equals("badLogin") && username.equals(attemptedUsername)) {
 
@@ -276,6 +273,29 @@ public class ServerConnection {
                     }
 
                 });
+
+    }
+
+    /**
+     * Sends a message to the server asking for a refresh on all waitlist data for clients.
+     */
+    public void refreshWaitListData(){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "getWaitlistData");
+
+        JsonObject data = new JsonObject();
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+            System.out.println("send me waitlist data please");
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
 
     }
 

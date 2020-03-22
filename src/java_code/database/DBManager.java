@@ -253,4 +253,62 @@ public class DBManager {
 
     }
 
+    /**
+     * Returns all current venue names.
+     * @return
+     */
+    public static Vector<String> getAllVenueNames(){
+
+        String sql = "SELECT * FROM venue";
+
+        try{
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            Vector<String> tmp = new Vector<>();
+            while(rs.next())
+                tmp.add(rs.getString("name"));
+
+            System.out.println("Names:");
+            for(int i = 0; i < tmp.size(); i++)
+                System.out.println(tmp.get(i));
+
+            return tmp;
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
+    /**
+     * Returns the current venue types.
+     * @return
+     */
+    public static Vector<String> getAllVenueTypes(){
+
+        String sql = "SELECT * FROM venue";
+
+        try{
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            Vector<String> tmp = new Vector<>();
+            while(rs.next())
+                tmp.add(rs.getString("venue_type"));
+
+            System.out.println("Types:");
+            for(int i = 0; i < tmp.size(); i++)
+                System.out.println(tmp.get(i));
+
+            return tmp;
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
 }

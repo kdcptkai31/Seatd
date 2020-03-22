@@ -2,9 +2,7 @@ package java_code.view;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.pubnub.api.PubNub;
-import com.pubnub.api.PubNubException;
 import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
@@ -14,7 +12,6 @@ import com.pubnub.api.models.consumer.pubsub.message_actions.PNMessageActionResu
 import com.pubnub.api.models.consumer.pubsub.objects.PNMembershipResult;
 import com.pubnub.api.models.consumer.pubsub.objects.PNSpaceResult;
 import com.pubnub.api.models.consumer.pubsub.objects.PNUserResult;
-import java_code.controller.Controller;
 import java_code.controller.ServerConnection;
 import java_code.model.Patron;
 import javafx.application.Platform;
@@ -31,8 +28,6 @@ import java.util.Iterator;
 
 public class VenueView {
 
-    Controller controller;
-    ServerConnection conn;
     @FXML
     private Label venueNameLabel;
     @FXML
@@ -48,6 +43,7 @@ public class VenueView {
     @FXML
     private Label errorText;
 
+    ServerConnection conn;
     private int selectedVenue;
     private String attemptedWaitlistAdd;
 
@@ -58,9 +54,7 @@ public class VenueView {
     protected void initialize(){
 
         conn = ServerConnection.getInstance();
-        controller = SeatDApplication.getController();
         SeatDApplication.setToDefaultWindowSize();
-        refresh();
         errorText.setVisible(false);
 
         //SET SELECTED VENUE BASED ON WHAT THEY CLICKED TO GET HERE, THIS IS A PLACEHOLDER*********************
@@ -68,38 +62,16 @@ public class VenueView {
 
         attemptedWaitlistAdd = "";
 
-        registerWaitlistTimeListener();
+        registerVenueAllDataListener();
         registerWaitlistAddListener();
+        refresh();
 
     }
 
     /**
-     * Refreshes the scene with the most current data.
+     * Refreshes the scene with the most current data for the currently selected venue.
      */
-    public void refresh(){
-
-        venueNameLabel.setText(controller.venueName);
-        venueTypeLabel.setText(controller.venueType);
-        waitTimeLabel.setText(Integer.toString(controller.waitlist.size() * controller.waitPerPatron));
-        waitlistSize.setText(Integer.toString(controller.waitlist.size()));
-
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "getWaitlistData");
-
-        JsonObject data = new JsonObject();
-        msg.add("data", data);
-
-        try {
-            conn.getPubNub().publish()
-                    .channel("main")
-                    .message(msg)
-                    .sync();
-            System.out.println("send me waitlist data please");
-        } catch (PubNubException e) {
-            e.printStackTrace();
-        }
-
-    }
+    public void refresh(){conn.refreshWaitListData();}
 
     /**
      * Loads the login scene.
@@ -131,7 +103,6 @@ public class VenueView {
                 e.printStackTrace();
             }
 
-
         }else{
 
             errorText.setText("***missing credentials***");
@@ -144,7 +115,7 @@ public class VenueView {
     /**
      * Listens for the server's update on the specific wait time of the venue the user has selected.
      */
-    public void registerWaitlistTimeListener(){
+    public void registerVenueAllDataListener(){
 
         conn.getPubNub().addListener(new SubscribeCallback() {
             @Override
@@ -153,30 +124,45 @@ public class VenueView {
             public void message(@NotNull PubNub pubnub, @NotNull PNMessageResult message) {
 
                 String type = message.getMessage().getAsJsonObject().get("type").getAsString();//Message type
-                if(type.equals("clockTick")){
+                if(type.equals("updateAllData")){
 
                     //Extract waitTimes and waitSizes
-                    JsonArray waitTimes = message.getMessage().getAsJsonObject().get("data").getAsJsonObject().get("waitTimes").
-                                     getAsJsonArray();
-                    JsonArray waitSizes = message.getMessage().getAsJsonObject().get("data").getAsJsonObject().get("waitSizes").
-                            getAsJsonArray();
+                    JsonArray waitTimes = message.getMessage().getAsJsonObject().get("data").getAsJsonObject().
+                            get("waitTimes").getAsJsonArray();
+                    JsonArray waitSizes = message.getMessage().getAsJsonObject().get("data").getAsJsonObject().
+                            get("waitSizes").getAsJsonArray();
+                    JsonArray venueNames = message.getMessage().getAsJsonObject().get("data").getAsJsonObject().
+                            get("venueNames").getAsJsonArray();
+                    JsonArray venueTypes = message.getMessage().getAsJsonObject().get("data").getAsJsonObject().
+                            get("venueTypes").getAsJsonArray();
                     Iterator<JsonElement> waitTimeIt = waitTimes.iterator();
                     Iterator<JsonElement> waitSizeIt = waitSizes.iterator();
+                    Iterator<JsonElement> venueNameIt = venueNames.iterator();
+                    Iterator<JsonElement> venueTypeIt = venueTypes.iterator();
                     ArrayList<Integer> waitlistTimes = new ArrayList<>();
                     ArrayList<Integer> waitListSizes = new ArrayList<>();
+                    ArrayList<String> allVenueNames = new ArrayList<>();
+                    ArrayList<String> allVenueTypes = new ArrayList<>();
 
-                    while(waitTimeIt.hasNext() && waitSizeIt.hasNext()){
+                    while(waitTimeIt.hasNext() && waitSizeIt.hasNext() && venueNameIt.hasNext() && venueTypeIt.hasNext()){
 
                         JsonElement ele = waitTimeIt.next();
                         waitlistTimes.add(ele.getAsInt());
                         JsonElement ele2 = waitSizeIt.next();
                         waitListSizes.add(ele2.getAsInt());
+                        JsonElement ele3 = venueNameIt.next();
+                        allVenueNames.add(ele3.getAsString());
+                        JsonElement ele4 = venueTypeIt.next();
+                        allVenueTypes.add(ele4.getAsString());
 
                     }
 
                     Platform.runLater(() -> {
                         waitTimeLabel.setText(Integer.toString(waitlistTimes.get(selectedVenue)));
                         waitlistSize.setText(Integer.toString(waitListSizes.get(selectedVenue)));
+                        venueNameLabel.setText(allVenueNames.get(selectedVenue));
+                        venueTypeLabel.setText(allVenueTypes.get(selectedVenue));
+
                     });
 
                 }

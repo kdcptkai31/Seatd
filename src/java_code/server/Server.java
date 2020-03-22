@@ -28,6 +28,8 @@ public class Server {
     private DBManager dbManager;
     private Vector<Integer> currentVenueWaits; //Represents the waittime for each venue, mod its wait per patron.
     private Vector<Integer> currentVenueWaitSizes; //Represents the waitlist size for each venue
+    private Vector<String> currentVenueNames;
+    private Vector<String> currentVenueTypes;
     private Timer timer;
 
     /**
@@ -47,11 +49,15 @@ public class Server {
         //initialize venue wait times
         currentVenueWaits = new Vector<>();
         currentVenueWaitSizes = new Vector<>();
+        currentVenueNames = new Vector<>();
+        currentVenueTypes = new Vector<>();
         int tmp = dbManager.getVenueCount();
         for(int i = 0; i < tmp; i++) {
 
             currentVenueWaits.add(0);
             currentVenueWaitSizes.add(0);
+            currentVenueNames.add("");
+            currentVenueTypes.add("");
 
         }
 
@@ -81,7 +87,7 @@ public class Server {
             @Override
             public void run() {
 
-                updateCurrentVenueWaits();
+                updateCurrentVenueData();
                 decrementVenueWaittimes();
 
                 for(int i = 0; i < currentVenueWaits.size(); i++)
@@ -91,15 +97,17 @@ public class Server {
                 sendUpdateWaitlistData(pubnub);
 
             }
-        }, 1000, 60000);
+        }, 1000, 60000); //Runs every minute
 
     }
 
     /**
      * Updates the data structure with the current wait time for each venue.
      */
-    public void updateCurrentVenueWaits(){
+    public void updateCurrentVenueData(){
 
+        currentVenueNames = dbManager.getAllVenueNames();
+        currentVenueTypes = dbManager.getAllVenueTypes();
         Vector<Integer> waitlistSizes = dbManager.getAllWaitlistSizes();
         Vector<Integer> waitPerPatrons = dbManager.getAllWaitPerPatrons();
         if(waitlistSizes == null || waitPerPatrons == null)
@@ -156,11 +164,13 @@ public class Server {
     public void sendUpdateWaitlistData(PubNub pubnub){
 
         JsonObject msg = new JsonObject();
-        msg.addProperty("type", "clockTick");
+        msg.addProperty("type", "updateAllData");
 
         JsonObject data = new JsonObject();
         data.add("waitTimes", getJSONArrayFromVector(getCurrentVenueWaits()));
         data.add("waitSizes", getJSONArrayFromVector(getCurrentVenueWaitSizes()));
+        data.add("venueNames", getJsonArrayFromStringVector(getCurrentVenueNames()));
+        data.add("venueTypes", getJsonArrayFromStringVector(getCurrentVenueTypes()));
         msg.add("data", data);
 
         try {
@@ -197,8 +207,20 @@ public class Server {
 
     }
 
+    public JsonArray getJsonArrayFromStringVector(Vector<String> vector){
+
+        JsonArray array = new JsonArray();
+        for(int i = 0; i < vector.size(); i++)
+            array.add(vector.get(i));
+
+        return array;
+
+    }
+
     public Vector<Integer> getCurrentVenueWaits(){return currentVenueWaits;}
     public Vector<Integer> getCurrentVenueWaitSizes(){return currentVenueWaitSizes;}
+    public Vector<String> getCurrentVenueNames(){return currentVenueNames;}
+    public Vector<String> getCurrentVenueTypes(){return currentVenueTypes;}
 
     /**
      * Adds a currently running client's uuid to send specific messages to them.
