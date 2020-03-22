@@ -18,6 +18,21 @@
       <root url="jar://$PROJECT_DIR$/lib/json-20190722.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/pubnub-gson-4.31.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/logging-interceptor-3.12.6-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/okhttp-3.12.6-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/okio-1.15.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/gson-2.8.6-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/retrofit-2.6.2-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/slf4j-api-1.7.28-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/converter-gson-2.6.2-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-databind-2.9.9-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-annotations-2.9.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-core-2.9.9-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jackson-dataformat-cbor-2.9.9-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/annotations-17.0.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/json-20190722-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>
