@@ -1,10 +1,10 @@
 package java_code.view;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.pubnub.api.PubNub;
+import com.pubnub.api.PubNubException;
 import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
@@ -83,6 +83,22 @@ public class VenueView {
         waitTimeLabel.setText(Integer.toString(controller.waitlist.size() * controller.waitPerPatron));
         waitlistSize.setText(Integer.toString(controller.waitlist.size()));
 
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "getWaitlistData");
+
+        JsonObject data = new JsonObject();
+        msg.add("data", data);
+
+        try {
+            conn.getPubNub().publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+            System.out.println("send me waitlist data please");
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -139,23 +155,31 @@ public class VenueView {
                 String type = message.getMessage().getAsJsonObject().get("type").getAsString();//Message type
                 if(type.equals("clockTick")){
 
-                    JsonArray data = message.getMessage().getAsJsonObject().get("data").getAsJsonObject().get("data").
+                    //Extract waitTimes and waitSizes
+                    JsonArray waitTimes = message.getMessage().getAsJsonObject().get("data").getAsJsonObject().get("waitTimes").
                                      getAsJsonArray();
-                    Iterator<JsonElement> it = data.iterator();
+                    JsonArray waitSizes = message.getMessage().getAsJsonObject().get("data").getAsJsonObject().get("waitSizes").
+                            getAsJsonArray();
+                    Iterator<JsonElement> waitTimeIt = waitTimes.iterator();
+                    Iterator<JsonElement> waitSizeIt = waitSizes.iterator();
                     ArrayList<Integer> waitlistTimes = new ArrayList<>();
-                    while(it.hasNext()){
-                        JsonElement ele = it.next();
-                        waitlistTimes.add(ele.getAsInt());
-                    }
+                    ArrayList<Integer> waitListSizes = new ArrayList<>();
 
-                    System.out.println(waitlistTimes.get(selectedVenue));
+                    while(waitTimeIt.hasNext() && waitSizeIt.hasNext()){
+
+                        JsonElement ele = waitTimeIt.next();
+                        waitlistTimes.add(ele.getAsInt());
+                        JsonElement ele2 = waitSizeIt.next();
+                        waitListSizes.add(ele2.getAsInt());
+
+                    }
 
                     Platform.runLater(() -> {
                         waitTimeLabel.setText(Integer.toString(waitlistTimes.get(selectedVenue)));
+                        waitlistSize.setText(Integer.toString(waitListSizes.get(selectedVenue)));
                     });
 
                 }
-
 
             }
             @Override
@@ -183,10 +207,12 @@ public class VenueView {
             public void message(@NotNull PubNub pubnub, @NotNull PNMessageResult message) {
 
                 String type = message.getMessage().getAsJsonObject().get("type").getAsString();//Message type
-                JsonObject data = message.getMessage().getAsJsonObject().get("data").getAsJsonObject();
+                if (!Arrays.asList("goodWaitlistAdd", "badWaitlistAdd").contains(type))
+                    return;
 
-                if (!Arrays.asList("goodWaitlistAdd", "badWaitlistAdd").contains(type)) return;
-
+                String name = message.getMessage().getAsJsonObject().get("data").getAsJsonObject().get("name").getAsString();
+                if(!attemptedWaitlistAdd.equals(name))
+                    return;
 
                 if(type.equals("goodWaitlistAdd")){
 
@@ -204,7 +230,6 @@ public class VenueView {
                     });
 
                 }
-
 
             }
             @Override

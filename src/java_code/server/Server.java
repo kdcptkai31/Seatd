@@ -8,6 +8,7 @@ import com.pubnub.api.PubNubException;
 import java_code.database.DBManager;
 import java_code.model.Patron;
 import java_code.server.handlers.AddWaitlistHandler;
+import java_code.server.handlers.GetWaitlistDataHandler;
 import java_code.server.handlers.ServerLoginHandler;
 
 import java.util.*;
@@ -25,7 +26,8 @@ public class Server {
     private MessageDelegator delegator;
     private HashMap<String, String> users;
     private DBManager dbManager;
-    private Vector<Integer> currentVenueWaits; //Represents the waittime for each venue, mod 15.
+    private Vector<Integer> currentVenueWaits; //Represents the waittime for each venue, mod its wait per patron.
+    private Vector<Integer> currentVenueWaitSizes; //Represents the waitlist size for each venue
     private Timer timer;
 
     /**
@@ -44,9 +46,14 @@ public class Server {
         dbManager = new DBManager();
         //initialize venue wait times
         currentVenueWaits = new Vector<>();
+        currentVenueWaitSizes = new Vector<>();
         int tmp = dbManager.getVenueCount();
-        for(int i = 0; i < tmp; i++)
+        for(int i = 0; i < tmp; i++) {
+
             currentVenueWaits.add(0);
+            currentVenueWaitSizes.add(0);
+
+        }
 
         timer = new Timer();
 
@@ -59,6 +66,7 @@ public class Server {
 
         delegator.addHandler("login", new ServerLoginHandler(this));
         delegator.addHandler("addWaitlist", new AddWaitlistHandler(this));
+        delegator.addHandler("getWaitlistData", new GetWaitlistDataHandler(this));
         pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
         startClock();
 
@@ -80,25 +88,10 @@ public class Server {
                     System.out.println(currentVenueWaits.get(i));
                 System.out.println("---------");
 
-                JsonObject msg = new JsonObject();
-                msg.addProperty("type", "clockTick");
-
-                JsonObject data = new JsonObject();
-                data.add("data", getJSONArrayFromVector(currentVenueWaits));
-                msg.add("data", data);
-
-                try {
-                    pubnub.publish()
-                            .channel("main")
-                            .message(msg)
-                            .sync();
-                } catch (PubNubException e) {
-                    e.printStackTrace();
-                }
+                sendUpdateWaitlistData(pubnub);
 
             }
         }, 1000, 60000);
-
 
     }
 
@@ -113,6 +106,8 @@ public class Server {
             return;
 
         for(int i = 0; i < waitlistSizes.size(); i++){
+
+            currentVenueWaitSizes.setElementAt(waitlistSizes.get(i), i);
 
             if(currentVenueWaits.get(i) % waitPerPatrons.get(i) == 0)
                 currentVenueWaits.setElementAt((currentVenueWaits.get(i) % waitPerPatrons.get(i))+
@@ -155,13 +150,39 @@ public class Server {
     }
 
     /**
+     * Sends a message to all clients with updated data for their venues
+     * @param pubnub
+     */
+    public void sendUpdateWaitlistData(PubNub pubnub){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "clockTick");
+
+        JsonObject data = new JsonObject();
+        data.add("waitTimes", getJSONArrayFromVector(getCurrentVenueWaits()));
+        data.add("waitSizes", getJSONArrayFromVector(getCurrentVenueWaitSizes()));
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
      * Removes the patron on the top of the waitlist for the given venueID and sends them an email.
      * @param venueID
      */
     private void serveVenuePatron(int venueID){
-        System.out.println("REMOVE WAITLIST");
+        System.out.println("REMOVE FROM WAITLIST");
         //Send email to this person, THEN execute the statement below
         dbManager.servePatron(venueID);
+        currentVenueWaitSizes.setElementAt(currentVenueWaitSizes.get(venueID) - 1, venueID);
 
 
     }
@@ -177,6 +198,7 @@ public class Server {
     }
 
     public Vector<Integer> getCurrentVenueWaits(){return currentVenueWaits;}
+    public Vector<Integer> getCurrentVenueWaitSizes(){return currentVenueWaitSizes;}
 
     /**
      * Adds a currently running client's uuid to send specific messages to them.

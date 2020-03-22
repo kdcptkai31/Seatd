@@ -24,14 +24,10 @@ public class AddWaitlistHandler implements MessageHandler {
 
             sendGoodAdd(pubnub, name);
             server.updateCurrentVenueWaits();
-            sendUpdateWaitlistTimes(pubnub);
+            server.sendUpdateWaitlistData(pubnub);
 
-        }else{
-
+        }else
             sendBadAdd(pubnub, name);
-
-        }
-
 
     }
 
@@ -54,7 +50,6 @@ public class AddWaitlistHandler implements MessageHandler {
             e.printStackTrace();
         }
 
-
     }
 
     private void sendBadAdd(PubNub pubnub, String name){
@@ -72,26 +67,6 @@ public class AddWaitlistHandler implements MessageHandler {
                     .message(msg)
                     .sync();
             System.out.println(name.concat(" tried to add to the waitlist and failed"));
-        } catch (PubNubException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    private void sendUpdateWaitlistTimes(PubNub pubnub){
-
-        JsonObject msg = new JsonObject();
-        msg.addProperty("type", "clockTick");
-
-        JsonObject data = new JsonObject();
-        data.add("data", server.getJSONArrayFromVector(server.getCurrentVenueWaits()));
-        msg.add("data", data);
-
-        try {
-            pubnub.publish()
-                    .channel("main")
-                    .message(msg)
-                    .sync();
         } catch (PubNubException e) {
             e.printStackTrace();
         }
