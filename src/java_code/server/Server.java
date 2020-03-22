@@ -46,7 +46,6 @@ public class Server {
 
         users = new HashMap<>();
         dbManager = new DBManager();
-        //initialize venue wait times
         currentVenueWaits = new Vector<>();
         currentVenueWaitSizes = new Vector<>();
         currentVenueNames = new Vector<>();

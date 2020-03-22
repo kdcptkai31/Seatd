@@ -168,6 +168,7 @@ public class VenueView {
                 }
 
             }
+
             @Override
             public void presence(@NotNull PubNub pubnub, @NotNull PNPresenceEventResult pnPresenceEventResult) {}
             @Override
@@ -218,6 +219,7 @@ public class VenueView {
                 }
 
             }
+
             @Override
             public void presence(@NotNull PubNub pubnub, @NotNull PNPresenceEventResult pnPresenceEventResult) {}
             @Override

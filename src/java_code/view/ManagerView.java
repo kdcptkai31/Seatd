@@ -35,53 +35,53 @@ public class ManagerView {
         conn = ServerConnection.getInstance();
         controller = SeatDApplication.getController();
         SeatDApplication.setToDefaultWindowSize();
-        //refreshPage();
+        refreshPage();
 
     }
 
-//    /**
-//     * Fetches the most recent data for a specific venue and loads it into the scene.
-//     */
-//    private void refreshPage(){
-//
-//        venueNameLabel.setText(controller.venueName);
-//        waitPerPatronField.setPromptText(Integer.toString(controller.waitPerPatron));
-//        waitPerPatronField.setFocusTraversable(false);
-//
-//        waitlistView.getItems().clear();
-//        ObservableList<String> waitlistPatrons = FXCollections.observableArrayList();
-//
-//        if (controller.waitlist.size() > 0) {
-//
-//            Object[] tmp = controller.waitlist.toArray();
-//
-//            for (int i = 0; i < controller.waitlist.size(); i++)
-//                waitlistPatrons.add(Integer.toString(i + 1).concat(". ").concat(tmp[i].toString()));
-//
-//            waitlistView.setItems(waitlistPatrons);
-//
-//        } else {
-//            waitlistPatrons.add("Nobody is on the waitlist your venue sucks.");
-//        }
-//
-//        totalWaitTimeLabel.setText(Integer.toString(waitlistPatrons.size() * controller.waitPerPatron));
-//
-//    }
-//
-//    /**
-//     * Checks if a new wait time per patron was entered, if so, it updates the controller and refreshes the scene.
-//     */
-//    public void onUpdateWaitPerPatronClicked(){
-//
+    /**
+     * Fetches the most recent data for a specific venue and loads it into the scene.
+     */
+    private void refreshPage(){
+
+        venueNameLabel.setText("af");
+        waitPerPatronField.setPromptText(Integer.toString(15));
+        waitPerPatronField.setFocusTraversable(false);
+
+        waitlistView.getItems().clear();
+        ObservableList<String> waitlistPatrons = FXCollections.observableArrayList();
+
+        if (0 > 0) {
+
+            Object[] tmp = new Object[2]/*controller.waitlist.toArray()*/;
+
+            for (int i = 0; i < 0; i++)
+                waitlistPatrons.add(Integer.toString(i + 1).concat(". ").concat(tmp[i].toString()));
+
+            waitlistView.setItems(waitlistPatrons);
+
+        } else {
+            waitlistPatrons.add("Nobody is on the waitlist your venue sucks.");
+        }
+
+        totalWaitTimeLabel.setText(Integer.toString(waitlistPatrons.size() * 15));
+
+    }
+
+    /**
+     * Checks if a new wait time per patron was entered, if so, it updates the controller and refreshes the scene.
+     */
+    public void onUpdateWaitPerPatronClicked(){
+
 //        if(!waitPerPatronField.getText().equals(Integer.toString(controller.waitPerPatron))) {
 //
 //            controller.waitPerPatron = Integer.parseInt(waitPerPatronField.getText());
 //            refreshPage();
 //        }
-//
-//        waitPerPatronField.clear();
-//
-//    }
+
+        waitPerPatronField.clear();
+
+    }
 
     /**
      * Logs the manager out and returns them to the venue scene.
@@ -90,7 +90,6 @@ public class ManagerView {
 
         try {
             SeatDApplication.getCoordinator().showVenueScene();
-            conn.getLoggedInObservable().set(false);
         } catch (IOException e) {
             e.printStackTrace();
         }
