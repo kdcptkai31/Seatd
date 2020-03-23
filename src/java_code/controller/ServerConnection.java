@@ -246,6 +246,31 @@ public class ServerConnection {
 
     }
 
+    /**
+     * Sends a message requesting to update the wait per patron value for the given venue.
+     * @param venueID
+     */
+    public void updateWaitPerPatron(int venueID, int waitPerPatronValue){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "updateWaitPerPatron");
+
+        JsonObject data = new JsonObject();
+        data.addProperty("venueID", venueID);
+        data.addProperty("wppValue", waitPerPatronValue);
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     //Getters
     public PubNub getPubNub(){return pubnub;}
 

@@ -55,6 +55,7 @@ public class ManagerView {
         SeatDApplication.setToDefaultWindowSize();
         registerManagerPageDataListener();
         conn.getManagerPageData(controller.getVenueID());
+        waitPerPatronField.setFocusTraversable(false);
 
     }
 
@@ -78,8 +79,20 @@ public class ManagerView {
                                 getAsInt() == controller.getVenueID())
                     updateWaitlistList(message);
 
+                if(type.equals("badWaitPerPatronUpdate") &&
+                        message.getMessage().getAsJsonObject().get("data").getAsJsonObject().get("venueID").
+                                getAsInt() == controller.getVenueID()){
+
+                    waitPerPatronField.clear();
+                    waitPerPatronField.setFocusTraversable(false);
+
+                }
+
+
                 if(!type.equals("managerViewData"))
                     return;
+
+                Platform.runLater(()->{waitlistView.getItems().clear();});
 
                 JsonObject data = message.getMessage().getAsJsonObject().get("data").getAsJsonObject();
 
@@ -93,7 +106,6 @@ public class ManagerView {
                     waitlistPatrons.add(new Patron(waitNameIt.next().getAsString(), waitEmailIt.next().getAsString()));
 
                 ObservableList<String> waitlistViewList = FXCollections.observableArrayList();
-                waitlistView.getItems().clear();
                 if(!waitlistPatrons.isEmpty()){
 
                     for(int i = 0; i < waitlistPatrons.size(); i++)
@@ -103,7 +115,8 @@ public class ManagerView {
                 }else
                     waitlistViewList.add("Nobody is on the waitlist your venue sucks.");
 
-                waitlistView.setItems(waitlistViewList);
+                Platform.runLater(()->{waitlistView.setItems(waitlistViewList);});
+
                 conn.refreshWaitListData();
 
                 //Run Extraction
@@ -111,7 +124,6 @@ public class ManagerView {
                     totalWaitTimeLabel.setText(String.valueOf(data.get("waitPerPatron").getAsInt() * waitlistPatrons.size()));
                     venueNameLabel.setText(data.get("name").getAsString());
                     waitPerPatronField.setPromptText(data.get("waitPerPatron").getAsString());
-                    waitPerPatronField.setFocusTraversable(false);
                 });
 
             }
@@ -154,6 +166,7 @@ public class ManagerView {
      */
     private void updateWaitlistList(PNMessageResult message){
 
+        Platform.runLater(()->{waitlistView.getItems().clear();});
         JsonObject data = message.getMessage().getAsJsonObject().get("data").getAsJsonObject();
 
         JsonArray names = data.get("names").getAsJsonArray();
@@ -165,7 +178,6 @@ public class ManagerView {
             patrons.add(new Patron(nameElements.next().getAsString(), emailElements.next().getAsString()));
 
         ObservableList<String> waitlistViewList = FXCollections.observableArrayList();
-        waitlistView.getItems().clear();
         if(!patrons.isEmpty()){
 
             for(int i = 0; i < patrons.size(); i++)
@@ -175,9 +187,10 @@ public class ManagerView {
         }else
             waitlistViewList.add("Nobody is on the waitlist your venue sucks.");
 
-        waitlistView.setItems(waitlistViewList);
-
-        Platform.runLater(()->{totalWaitTimeLabel.setText(Integer.toString(data.get("waittime").getAsInt()));});
+        Platform.runLater(()->{
+            waitlistView.setItems(waitlistViewList);
+            totalWaitTimeLabel.setText(Integer.toString(data.get("waittime").getAsInt()));
+        });
 
     }
 
@@ -186,11 +199,9 @@ public class ManagerView {
      */
     public void onUpdateWaitPerPatronClicked(){
 
-//        if(!waitPerPatronField.getText().equals(Integer.toString(controller.waitPerPatron))) {
-//
-//            controller.waitPerPatron = Integer.parseInt(waitPerPatronField.getText());
-//            refreshPage();
-//        }
+        String entry = waitPerPatronField.getText();
+        if(!entry.isEmpty() && !entry.equals((waitPerPatronField.getPromptText())) && Integer.valueOf(entry) > 0)
+            conn.updateWaitPerPatron(controller.getVenueID(), Integer.parseInt(waitPerPatronField.getText()));
 
         waitPerPatronField.clear();
 
@@ -202,7 +213,6 @@ public class ManagerView {
     public void onLogoutButtonClicked(){
 
         try {
-            controller.setVenueID(-1);
             SeatDApplication.getCoordinator().showVenueScene();
         } catch (IOException e) {
             e.printStackTrace();

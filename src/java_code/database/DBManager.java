@@ -363,4 +363,27 @@ public class DBManager {
 
     }
 
+    /**
+     * Updates a venue's wait per patron value.
+     * @param venueID
+     * @param waitPerPatronValue
+     * @return
+     */
+    public static boolean updateVenueWaitPerPatron(int venueID, int waitPerPatronValue){
+
+        String sql = "UPDATE venue SET wait_per_patron = ? WHERE venue_id = ?";
+
+        try {
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, waitPerPatronValue);
+            stmt.setInt(2, venueID);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
 }

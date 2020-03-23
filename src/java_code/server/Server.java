@@ -7,10 +7,7 @@ import com.pubnub.api.PubNub;
 import com.pubnub.api.PubNubException;
 import java_code.database.DBManager;
 import java_code.model.Patron;
-import java_code.server.handlers.AddWaitlistHandler;
-import java_code.server.handlers.GetManagerDataHandler;
-import java_code.server.handlers.GetWaitlistDataHandler;
-import java_code.server.handlers.ServerLoginHandler;
+import java_code.server.handlers.*;
 
 import java.util.*;
 
@@ -74,6 +71,7 @@ public class Server {
         delegator.addHandler("addWaitlist", new AddWaitlistHandler(this));
         delegator.addHandler("getWaitlistData", new GetWaitlistDataHandler(this));
         delegator.addHandler("getManagerData", new GetManagerDataHandler(this));
+        delegator.addHandler("updateWaitPerPatron", new UpdateWaitPerPatron(this));
         pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
         startClock();
 
@@ -189,6 +187,7 @@ public class Server {
         //Send email to this person, THEN execute the statement below
         dbManager.servePatron(venueID);
         currentVenueWaitSizes.setElementAt(currentVenueWaitSizes.get(venueID) - 1, venueID);
+        sendUpdateWaitlist(venueID);
 
 
     }
@@ -243,6 +242,49 @@ public class Server {
         data.add("names", getJsonArrayFromStringVector(names));
         data.add("emails", getJsonArrayFromStringVector(emails));
         msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Sends all needed data to update the manager page for a certain venue.
+     * @param data
+     */
+    public void updateManagerPage(JsonObject data){
+
+        int venueID = data.get("venueID").getAsInt();
+        Vector<String> nameAndWaitPerPatron = DBManager.getVenueNameAndWaitPerPatron(venueID);
+        Vector<Patron> waitlistPatrons = DBManager.getWaitlistFromVenueID(venueID);
+
+        if(nameAndWaitPerPatron == null || waitlistPatrons == null)
+            return;
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "managerViewData");
+        JsonObject data1 = new JsonObject();
+        data1.addProperty("name", nameAndWaitPerPatron.get(0));
+        data1.addProperty("waitPerPatron", nameAndWaitPerPatron.get(1));
+
+        JsonArray names = new JsonArray();
+        JsonArray emails = new JsonArray();
+        for(int i = 0; i < waitlistPatrons.size(); i++){
+
+            names.add(waitlistPatrons.get(i).getName());
+            emails.add(waitlistPatrons.get(i).getEmail());
+
+        }
+
+        data1.add("waitlistNames", names);
+        data1.add("waitlistEmails", emails);
+        msg.add("data", data1);
 
         try {
             pubnub.publish()
