@@ -207,6 +207,37 @@ public class ManagerView {
 
     }
 
+    public void onDeleteClicked(){
+
+        if(!waitlistView.getSelectionModel().isEmpty()){
+
+            String[] tmp = waitlistView.getSelectionModel().getSelectedItem().split(" | ");
+            String user_name = "";
+            String email = "";
+            boolean usernameRetieved = false;
+            for(int i = 0; i < tmp.length; i++) {
+
+                if (i > 0 && !usernameRetieved && !tmp[i].equals("|"))
+                    user_name = user_name.concat( " " + tmp[i]);
+
+                if(usernameRetieved)
+                    email = email.concat(" " + tmp[i]);
+
+                if(tmp[i].equals("|"))
+                    usernameRetieved = true;
+
+            }
+
+            user_name = user_name.trim();
+            email = email.trim();
+
+            conn.deleteWaitListPatron(controller.getVenueID(), user_name, email);
+
+
+        }
+
+    }
+
     /**
      * Logs the manager out and returns them to the venue scene.
      */

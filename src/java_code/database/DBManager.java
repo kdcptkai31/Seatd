@@ -386,4 +386,29 @@ public class DBManager {
 
     }
 
+    /**
+     * Attempts to delete a patron from the given venue.
+     * @param venueID
+     * @param name
+     * @param email
+     * @return
+     */
+    public static boolean deletePatronFromVenueWaitlist(int venueID, String name, String email){
+
+        String sql = "DELETE FROM waitlist WHERE cor_venue_id = ? AND user_name = ? AND email = ?";
+
+        try {
+            PreparedStatement stmt2 = connection.prepareStatement(sql);
+            stmt2.setInt(1, venueID);
+            stmt2.setString(2, name);
+            stmt2.setString(3, email);
+            stmt2.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
 }

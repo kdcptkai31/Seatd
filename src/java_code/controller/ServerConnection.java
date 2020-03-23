@@ -271,6 +271,34 @@ public class ServerConnection {
 
     }
 
+    /**
+     * Sends a message to delete a Patron from a specific venue's waitlist.
+     * @param venueID
+     * @param user_name
+     * @param email
+     */
+    public void deleteWaitListPatron(int venueID, String user_name, String email){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "deletePatronFromWaitlist");
+
+        JsonObject data = new JsonObject();
+        data.addProperty("venueID", venueID);
+        data.addProperty("user_name", user_name);
+        data.addProperty("email", email);
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     //Getters
     public PubNub getPubNub(){return pubnub;}
 

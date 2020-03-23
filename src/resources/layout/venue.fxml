@@ -22,6 +22,7 @@
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font></Label>
+                  <Button fx:id="loginButton" alignment="CENTER" mnemonicParsing="false" onMouseClicked="#onLoginClicked" text="Admin Login" textAlignment="CENTER" />
                </children>
                <HBox.margin>
                   <Insets />
@@ -30,10 +31,6 @@
                   <Insets />
                </opaqueInsets>
             </VBox>
-            <Button fx:id="loginButton" alignment="CENTER" mnemonicParsing="false" onMouseClicked="#onLoginClicked" text="Admin Login" textAlignment="CENTER">
-               <HBox.margin>
-                  <Insets />
-               </HBox.margin></Button>
          </children>
       </HBox>
    </top>
