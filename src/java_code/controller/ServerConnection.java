@@ -16,7 +16,6 @@ import com.pubnub.api.models.consumer.pubsub.objects.PNMembershipResult;
 import com.pubnub.api.models.consumer.pubsub.objects.PNSpaceResult;
 import com.pubnub.api.models.consumer.pubsub.objects.PNUserResult;
 import java_code.model.Patron;
-import java_code.observable.Observable;
 import java_code.server.MessageDelegator;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,8 +32,6 @@ public class ServerConnection {
     private MessageDelegator delegator;
     private PubNub pubnub;
     private PNConfiguration pnConfig;
-    private Observable<Boolean> loggedIn;
-    private String attemptedUsername = "noName";
 
     private ServerConnection(){
 
@@ -42,15 +39,11 @@ public class ServerConnection {
         pnConfig.setPublishKey(pubkey);
         pnConfig.setSubscribeKey(subkey);
         pubnub = new PubNub(pnConfig);
-
-        loggedIn = new Observable<>();
         delegator = new MessageDelegator();
 
         pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
 
         waitForServerPub();
-        registerLoginStatusListener();
-
 
     }
 
@@ -76,10 +69,10 @@ public class ServerConnection {
 
             @Override
             public void message(PubNub pubnub, PNMessageResult message) {
+
                 String type = message.getMessage().getAsJsonObject().get("type").getAsString();
-                if (!type.equals("serverPub")) {
+                if (!type.equals("serverPub"))
                     return;
-                }
 
             }
 
@@ -110,91 +103,21 @@ public class ServerConnection {
                 hereNow();
 
             }
-            @Override
-            public void signal(@NotNull PubNub pubNub, @NotNull PNSignalResult pnSignalResult) {
 
-            }
             @Override
-            public void user(@NotNull PubNub pubNub, @NotNull PNUserResult pnUserResult) {
-
-            }
+            public void signal(@NotNull PubNub pubNub, @NotNull PNSignalResult pnSignalResult) {}
             @Override
-            public void space(@NotNull PubNub pubNub, @NotNull PNSpaceResult pnSpaceResult) {
-
-            }
+            public void user(@NotNull PubNub pubNub, @NotNull PNUserResult pnUserResult) {}
             @Override
-            public void membership(@NotNull PubNub pubNub, @NotNull PNMembershipResult pnMembershipResult) {
-
-            }
+            public void space(@NotNull PubNub pubNub, @NotNull PNSpaceResult pnSpaceResult) {}
             @Override
-            public void messageAction(@NotNull PubNub pubNub, @NotNull PNMessageActionResult pnMessageActionResult) {
-
-            }
+            public void membership(@NotNull PubNub pubNub, @NotNull PNMembershipResult pnMembershipResult) {}
+            @Override
+            public void messageAction(@NotNull PubNub pubNub, @NotNull PNMessageActionResult pnMessageActionResult) {}
         });
 
         this.pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
 
-    }
-
-    /**
-     * Listener for login status
-     */
-    private void registerLoginStatusListener() {
-        pubnub.addListener(new SubscribeCallback() {
-            @Override
-            public void status(PubNub pubnub, PNStatus status) {}
-            @Override
-            public void message(PubNub pubnub, PNMessageResult message) {
-                String type = message.getMessage().getAsJsonObject().get("type").getAsString();//Message type
-                JsonObject data = message.getMessage().getAsJsonObject().get("data").getAsJsonObject();
-
-                if (!Arrays.asList("loggedIn", "badLogin").contains(type)) {
-                    return;
-                }
-
-                String username = data.get("username").getAsString();
-
-                if (type.equals("loggedIn") && username.equals(attemptedUsername)) {
-
-                    loggedIn.set(true);
-
-                }
-
-
-                if (type.equals("badLogin") && username.equals(attemptedUsername)) {
-
-                    loggedIn.set(false);
-                    attemptedUsername = "noName";
-
-                }
-
-            }
-
-            @Override
-            public void presence(PubNub pubnub, PNPresenceEventResult presence) {
-
-            }
-            @Override
-            public void signal(@NotNull PubNub pubNub, @NotNull PNSignalResult pnSignalResult) {
-
-            }
-            @Override
-            public void user(@NotNull PubNub pubNub, @NotNull PNUserResult pnUserResult) {
-
-            }
-            @Override
-            public void space(@NotNull PubNub pubNub, @NotNull PNSpaceResult pnSpaceResult) {
-
-            }
-            @Override
-            public void membership(@NotNull PubNub pubNub, @NotNull PNMembershipResult pnMembershipResult) {
-
-            }
-            @Override
-            public void messageAction(@NotNull PubNub pubNub, @NotNull PNMessageActionResult pnMessageActionResult) {
-
-            }
-        });
     }
 
     /**
@@ -204,7 +127,6 @@ public class ServerConnection {
      */
     public void login(String username, String password) {
 
-        attemptedUsername = username;
         JsonObject msg = new JsonObject();
         msg.addProperty("type", "login");
 
@@ -272,21 +194,84 @@ public class ServerConnection {
                         for (PNHereNowOccupantData occupant : channelData.getOccupants())
                             System.out.println("uuid: " + occupant.getUuid() + " state: " + occupant.getState());
 
-
                     }
 
                 });
 
     }
 
-    //Getters
-    public Observable<Boolean> getLoggedInObservable() {
-        return loggedIn;
+    /**
+     * Sends a message to the server asking for a refresh on all waitlist data for clients.
+     */
+    public void refreshWaitListData(){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "getWaitlistData");
+
+        JsonObject data = new JsonObject();
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
     }
+
+    /**
+     * Sends a message requesting the server to send the manager page data for a specific venue.
+     * @param venueID
+     */
+    public void getManagerPageData(int venueID){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "getManagerData");
+
+        JsonObject data = new JsonObject();
+        data.addProperty("venueID", venueID);
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Sends a message requesting to update the wait per patron value for the given venue.
+     * @param venueID
+     */
+    public void updateWaitPerPatron(int venueID, int waitPerPatronValue){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "updateWaitPerPatron");
+
+        JsonObject data = new JsonObject();
+        data.addProperty("venueID", venueID);
+        data.addProperty("wppValue", waitPerPatronValue);
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    //Getters
     public PubNub getPubNub(){return pubnub;}
-
-    //Setters
-    public void setAttemptedUsername(String str){attemptedUsername = str;}
-
 
 }

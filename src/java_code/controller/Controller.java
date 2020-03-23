@@ -1,31 +1,22 @@
 package java_code.controller;
 
-import java_code.model.Patron;
-
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
 /**
- * Holds local information, will be removed once the server is working fully and correctly. Represents a single venue.
+ * Holds local information.
  */
 public class Controller {
 
-    public String venueName;
-    public String venueType;
-    public BlockingQueue<Patron> waitlist;  //This is thread safe
-    public int waitPerPatron;
+    private String managerUsername;
+    private int venueID;
 
-    /**
-     * Loads defaults for the first sprint data.
-     */
     public Controller(){
 
-        venueName = "FRYING NEMO";
-        venueType = "Fish and Chips";
-        waitlist = new ArrayBlockingQueue<Patron>(100); //This is thread safe
-        waitPerPatron = 15;
-
+        managerUsername = "";
 
     }
+
+    public String getManagerUsername() {return managerUsername;}
+    public int getVenueID(){return venueID;}
+    public void setManagerUsername(String managerUsername){this.managerUsername = managerUsername;}
+    public void setVenueID(int i){venueID = i;}
 
 }

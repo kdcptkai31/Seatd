@@ -94,16 +94,20 @@ public class DBManager {
      */
     public static ManagerAccount getManagerAccountByUsername(String username){
 
-        String sql = "SELECT username, password FROM manager_account m WHERE m.username = ?";
+        String sql = "SELECT username, password, venue_id FROM manager_account m WHERE m.username = ?";
 
         try {
 
             PreparedStatement stmt  = connection.prepareStatement(sql);
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
-            while(rs.next()){
-                return new ManagerAccount(rs.getString("username"), rs.getString("password"));
+            if(rs.next()){
+                return new ManagerAccount(rs.getInt("venue_id"), rs.getString("username"),
+                        rs.getString("password"));
             }
+            return null;
+
+
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -250,6 +254,135 @@ public class DBManager {
         }
 
         return 0;
+
+    }
+
+    /**
+     * Returns all current venue names.
+     * @return
+     */
+    public static Vector<String> getAllVenueNames(){
+
+        String sql = "SELECT * FROM venue";
+
+        try{
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            Vector<String> tmp = new Vector<>();
+            while(rs.next())
+                tmp.add(rs.getString("name"));
+
+            return tmp;
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
+    /**
+     * Returns the current venue types.
+     * @return
+     */
+    public static Vector<String> getAllVenueTypes(){
+
+        String sql = "SELECT * FROM venue";
+
+        try{
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            Vector<String> tmp = new Vector<>();
+            while(rs.next())
+                tmp.add(rs.getString("venue_type"));
+
+            return tmp;
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
+    /**
+     * Returns the name and wait per patron value for the given venueID.
+     * @param venueID
+     * @return
+     */
+    public static Vector<String> getVenueNameAndWaitPerPatron(int venueID){
+
+        String sql = "SELECT name, wait_per_patron FROM venue WHERE venue_id = ?";
+
+        try {
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, venueID);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            Vector<String> tmp = new Vector<>();
+            tmp.add(rs.getString("name"));
+            tmp.add(String.valueOf(rs.getInt("wait_per_patron")));
+            rs.close();
+            return tmp;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
+    /**
+     * Returns the name and emails of every patron on the waitlist of a given venue.
+     * @param venueID
+     * @return
+     */
+    public static Vector<Patron> getWaitlistFromVenueID(int venueID){
+
+        String sql = "SELECT user_name, email FROM waitlist WHERE cor_venue_id = ?";
+
+        try {
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, venueID);
+            ResultSet rs = stmt.executeQuery();
+            Vector<Patron> tmp = new Vector<>();
+            while(rs.next())
+                tmp.add(new Patron(rs.getString("user_name"), rs.getString("email")));
+
+            rs.close();
+            return tmp;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
+    /**
+     * Updates a venue's wait per patron value.
+     * @param venueID
+     * @param waitPerPatronValue
+     * @return
+     */
+    public static boolean updateVenueWaitPerPatron(int venueID, int waitPerPatronValue){
+
+        String sql = "UPDATE venue SET wait_per_patron = ? WHERE venue_id = ?";
+
+        try {
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, waitPerPatronValue);
+            stmt.setInt(2, venueID);
+            stmt.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
 
     }
 

@@ -9,13 +9,13 @@ public class GetWaitlistDataHandler implements MessageHandler {
 
     private Server server;
 
-    public GetWaitlistDataHandler(Server server){this.server=server;}
+    public GetWaitlistDataHandler(Server server){this.server = server;}
 
     @Override
     public void handleMessage(JsonObject data, PubNub pubnub, String clientId) {
 
-        server.updateCurrentVenueWaits();
-        server.sendUpdateWaitlistData(pubnub);
+        server.updateCurrentVenueData();
+        server.sendUpdateWaitlistData();
 
     }
 }

@@ -23,8 +23,10 @@ public class AddWaitlistHandler implements MessageHandler {
         if(server.addToWaitlist(venueID,new Patron(name, email))){
 
             sendGoodAdd(pubnub, name);
-            server.updateCurrentVenueWaits();
-            server.sendUpdateWaitlistData(pubnub);
+            server.updateCurrentVenueData();
+            server.sendUpdateWaitlistData();
+            server.sendUpdateWaitlist(venueID);
+            server.updateManagerPage(data);
 
         }else
             sendBadAdd(pubnub, name);
