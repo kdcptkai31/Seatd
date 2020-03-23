@@ -216,7 +216,30 @@ public class ServerConnection {
                     .channel("main")
                     .message(msg)
                     .sync();
-            System.out.println("send me waitlist data please");
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Sends a message requesting the server to send the manager page data for a specific venue.
+     * @param venueID
+     */
+    public void getManagerPageData(int venueID){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "getManagerData");
+
+        JsonObject data = new JsonObject();
+        data.addProperty("venueID", venueID);
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
         } catch (PubNubException e) {
             e.printStackTrace();
         }

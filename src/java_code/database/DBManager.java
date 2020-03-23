@@ -94,16 +94,20 @@ public class DBManager {
      */
     public static ManagerAccount getManagerAccountByUsername(String username){
 
-        String sql = "SELECT username, password FROM manager_account m WHERE m.username = ?";
+        String sql = "SELECT username, password, venue_id FROM manager_account m WHERE m.username = ?";
 
         try {
 
             PreparedStatement stmt  = connection.prepareStatement(sql);
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
-            while(rs.next()){
-                return new ManagerAccount(rs.getString("username"), rs.getString("password"));
+            if(rs.next()){
+                return new ManagerAccount(rs.getInt("venue_id"), rs.getString("username"),
+                        rs.getString("password"));
             }
+            return null;
+
+
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -268,10 +272,6 @@ public class DBManager {
             while(rs.next())
                 tmp.add(rs.getString("name"));
 
-            System.out.println("Names:");
-            for(int i = 0; i < tmp.size(); i++)
-                System.out.println(tmp.get(i));
-
             return tmp;
 
         }catch (SQLException e){
@@ -297,13 +297,65 @@ public class DBManager {
             while(rs.next())
                 tmp.add(rs.getString("venue_type"));
 
-            System.out.println("Types:");
-            for(int i = 0; i < tmp.size(); i++)
-                System.out.println(tmp.get(i));
-
             return tmp;
 
         }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
+    /**
+     * Returns the name and wait per patron value for the given venueID.
+     * @param venueID
+     * @return
+     */
+    public static Vector<String> getVenueNameAndWaitPerPatron(int venueID){
+
+        String sql = "SELECT name, wait_per_patron FROM venue WHERE venue_id = ?";
+
+        try {
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, venueID);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            Vector<String> tmp = new Vector<>();
+            tmp.add(rs.getString("name"));
+            tmp.add(String.valueOf(rs.getInt("wait_per_patron")));
+            rs.close();
+            return tmp;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
+    /**
+     * Returns the name and emails of every patron on the waitlist of a given venue.
+     * @param venueID
+     * @return
+     */
+    public static Vector<Patron> getWaitlistFromVenueID(int venueID){
+
+        String sql = "SELECT user_name, email FROM waitlist WHERE cor_venue_id = ?";
+
+        try {
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, venueID);
+            ResultSet rs = stmt.executeQuery();
+            Vector<Patron> tmp = new Vector<>();
+            while(rs.next())
+                tmp.add(new Patron(rs.getString("user_name"), rs.getString("email")));
+
+            rs.close();
+            return tmp;
+
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 

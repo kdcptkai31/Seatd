@@ -8,6 +8,7 @@ import com.pubnub.api.PubNubException;
 import java_code.database.DBManager;
 import java_code.model.Patron;
 import java_code.server.handlers.AddWaitlistHandler;
+import java_code.server.handlers.GetManagerDataHandler;
 import java_code.server.handlers.GetWaitlistDataHandler;
 import java_code.server.handlers.ServerLoginHandler;
 
@@ -72,6 +73,7 @@ public class Server {
         delegator.addHandler("login", new ServerLoginHandler(this));
         delegator.addHandler("addWaitlist", new AddWaitlistHandler(this));
         delegator.addHandler("getWaitlistData", new GetWaitlistDataHandler(this));
+        delegator.addHandler("getManagerData", new GetManagerDataHandler(this));
         pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
         startClock();
 
@@ -88,12 +90,7 @@ public class Server {
 
                 updateCurrentVenueData();
                 decrementVenueWaittimes();
-
-                for(int i = 0; i < currentVenueWaits.size(); i++)
-                    System.out.println(currentVenueWaits.get(i));
-                System.out.println("---------");
-
-                sendUpdateWaitlistData(pubnub);
+                sendUpdateWaitlistData();
 
             }
         }, 1000, 60000); //Runs every minute
@@ -158,16 +155,16 @@ public class Server {
 
     /**
      * Sends a message to all clients with updated data for their venues
-     * @param pubnub
+     * @param
      */
-    public void sendUpdateWaitlistData(PubNub pubnub){
+    public void sendUpdateWaitlistData(){
 
         JsonObject msg = new JsonObject();
         msg.addProperty("type", "updateAllData");
 
         JsonObject data = new JsonObject();
-        data.add("waitTimes", getJSONArrayFromVector(getCurrentVenueWaits()));
-        data.add("waitSizes", getJSONArrayFromVector(getCurrentVenueWaitSizes()));
+        data.add("waitTimes", getJsonArrayFromIntegerVector(getCurrentVenueWaits()));
+        data.add("waitSizes", getJsonArrayFromIntegerVector(getCurrentVenueWaitSizes()));
         data.add("venueNames", getJsonArrayFromStringVector(getCurrentVenueNames()));
         data.add("venueTypes", getJsonArrayFromStringVector(getCurrentVenueTypes()));
         msg.add("data", data);
@@ -196,7 +193,12 @@ public class Server {
 
     }
 
-    public JsonArray getJSONArrayFromVector(Vector<Integer> vector){
+    /**
+     * Changes data structure format from a Integer vector to a JsonArray
+     * @param vector
+     * @return
+     */
+    public JsonArray getJsonArrayFromIntegerVector(Vector<Integer> vector){
 
         JsonArray array = new JsonArray();
         for(int i = 0; i < vector.size(); i++)
@@ -213,6 +215,43 @@ public class Server {
             array.add(vector.get(i));
 
         return array;
+
+    }
+
+    /**
+     * Updates all venue clients that are viewing the waitlist, when it is updated.
+     * @param venueID
+     */
+    public void sendUpdateWaitlist(int venueID){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "updateWaitlist");
+
+        JsonObject data = new JsonObject();
+        Vector<Patron> tmp = DBManager.getWaitlistFromVenueID(venueID);
+        Vector<String> names = new Vector<>();
+        Vector<String> emails = new Vector<>();
+        for(int i = 0; i < tmp.size(); i++){
+
+            names.add(tmp.get(i).getName());
+            emails.add(tmp.get(i).getEmail());
+
+        }
+
+        data.addProperty("venueID", venueID);
+        data.addProperty("waittime", getCurrentVenueWaits().get(venueID));
+        data.add("names", getJsonArrayFromStringVector(names));
+        data.add("emails", getJsonArrayFromStringVector(emails));
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
 
     }
 

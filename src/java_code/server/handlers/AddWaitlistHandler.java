@@ -24,7 +24,8 @@ public class AddWaitlistHandler implements MessageHandler {
 
             sendGoodAdd(pubnub, name);
             server.updateCurrentVenueData();
-            server.sendUpdateWaitlistData(pubnub);
+            server.sendUpdateWaitlistData();
+            server.sendUpdateWaitlist(venueID);
 
         }else
             sendBadAdd(pubnub, name);

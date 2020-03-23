@@ -15,7 +15,7 @@ public class GetWaitlistDataHandler implements MessageHandler {
     public void handleMessage(JsonObject data, PubNub pubnub, String clientId) {
 
         server.updateCurrentVenueData();
-        server.sendUpdateWaitlistData(pubnub);
+        server.sendUpdateWaitlistData();
 
     }
 }

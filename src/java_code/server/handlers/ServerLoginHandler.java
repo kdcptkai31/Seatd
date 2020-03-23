@@ -27,16 +27,17 @@ public class ServerLoginHandler implements MessageHandler {
             return;
         }
 
-        server.addUser(data.get("UUID").getAsString(), username);
-        sendLoggedIn(pubnub, username);
+        //implement check if already logged in in this method ^
+        sendLoggedIn(pubnub, username, manager.getVenueID());
     }
 
-    private void sendLoggedIn(PubNub pubnub, String username) {
+    private void sendLoggedIn(PubNub pubnub, String username, int venueID) {
         JsonObject msg = new JsonObject();
         msg.addProperty("type", "loggedIn");
 
         JsonObject data = new JsonObject();
         data.addProperty("username", username);
+        data.addProperty("venueID", venueID);
 
         msg.add("data", data);
 

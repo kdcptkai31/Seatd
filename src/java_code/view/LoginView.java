@@ -92,6 +92,7 @@ public class LoginView {
                 String username = data.get("username").getAsString();
                 if (type.equals("loggedIn") && username.equals(attemptedUsername)) {
 
+                    controller.setVenueID(data.get("venueID").getAsInt());
                     controller.setManagerUsername(attemptedUsername);
                     attemptedUsername = "";
                     Platform.runLater(() -> {

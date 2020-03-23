@@ -146,14 +146,10 @@ public class VenueView {
 
                     while(waitTimeIt.hasNext() && waitSizeIt.hasNext() && venueNameIt.hasNext() && venueTypeIt.hasNext()){
 
-                        JsonElement ele = waitTimeIt.next();
-                        waitlistTimes.add(ele.getAsInt());
-                        JsonElement ele2 = waitSizeIt.next();
-                        waitListSizes.add(ele2.getAsInt());
-                        JsonElement ele3 = venueNameIt.next();
-                        allVenueNames.add(ele3.getAsString());
-                        JsonElement ele4 = venueTypeIt.next();
-                        allVenueTypes.add(ele4.getAsString());
+                        waitlistTimes.add(waitTimeIt.next().getAsInt());
+                        waitListSizes.add(waitSizeIt.next().getAsInt());
+                        allVenueNames.add(venueNameIt.next().getAsString());
+                        allVenueTypes.add(venueTypeIt.next().getAsString());
 
                     }
 
@@ -185,6 +181,9 @@ public class VenueView {
 
     }
 
+    /**
+     * Handles verification message when a patron is trying to add to the waitlist.
+     */
     public void registerWaitlistAddListener(){
 
         conn.getPubNub().addListener(new SubscribeCallback() {
