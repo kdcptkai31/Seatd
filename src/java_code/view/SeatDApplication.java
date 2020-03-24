@@ -28,14 +28,15 @@ public class SeatDApplication extends Application {
 
         Window = primaryStage;
         Window.setTitle("SeatD");
-        setToDefaultWindowSize();
+        Window.setWidth(400);
+        Window.setHeight(600);
         Window.show();
         Window.setResizable(false);
 
         coordinator = new SceneCoordinator(Window);
 
         try {
-            coordinator.showVenueScene();
+            coordinator.showVenueListScene();
         } catch (IOException e) {
             e.printStackTrace();
         }

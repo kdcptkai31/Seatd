@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="java_code.view.VenueListView">
+   <children>
+      <ImageView fitHeight="756.0" fitWidth="584.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/whiteBackground.png" />
+         </image>
+      </ImageView>
+      <ImageView fitHeight="374.0" fitWidth="478.0" layoutX="-42.0" layoutY="-116.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../images/seatd_logo.png" />
+         </image></ImageView>
+      <VBox alignment="TOP_CENTER" layoutX="-176.0" layoutY="7.0" prefHeight="600.0" prefWidth="735.0" spacing="5.0">
+         <children>
+            <Button mnemonicParsing="false" onMouseClicked="#onloginClicked" text="Login">
+               <VBox.margin>
+                  <Insets left="250.0" top="20.0" />
+               </VBox.margin>
+            </Button>
+            <ComboBox fx:id="sortBox" onAction="#onSortMethodChanged" prefHeight="26.0" prefWidth="118.0" promptText="Sort Method" visibleRowCount="2">
+               <VBox.margin>
+                  <Insets top="85.0" />
+               </VBox.margin>
+            </ComboBox>
+            <ListView fx:id="venueList" maxHeight="-Infinity" maxWidth="-Infinity" prefHeight="338.0" prefWidth="300.0" />
+            <Button mnemonicParsing="false" onMouseClicked="#onGoToWaitlistClicked" text="Go To Waitlist!">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Button>
+         </children>
+      </VBox>
+   </children>
+</Pane>

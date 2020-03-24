@@ -338,6 +338,79 @@ public class ServerConnection {
 
     }
 
+    /**
+     * Sends a message to the server asking for a list of all venues and their types.
+     */
+    public void getVenuesForAdmin(){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "getVenuesForAdmin");
+
+        JsonObject data = new JsonObject();
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Sends a message to the server to change the venue name and type info.
+     * @param venueID
+     * @param newName
+     * @param newType
+     */
+    public void updateVenueInfo(int venueID, String newName, String newType){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "updateVenueNameAndType");
+
+        JsonObject data = new JsonObject();
+        data.addProperty("venueID", venueID);
+        data.addProperty("newName", newName);
+        data.addProperty("newType", newType);
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Requests the list of venues and their waittimes from the server.
+     * @param
+     */
+    public void getVenueListData(){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "getVenueListData");
+
+        JsonObject data = new JsonObject();
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public JsonArray getJsonArrayFromStringVector(Vector<String> vector){
 
         JsonArray array = new JsonArray();

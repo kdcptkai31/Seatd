@@ -388,6 +388,28 @@ public class DBManager {
     }
 
     /**
+     * Updates a venue's name and type.
+     * @param venueID
+     * @param newName
+     * @param newType
+     */
+    public static void updateVenueNameAndType(int venueID, String newName, String newType){
+
+        String sql = "UPDATE venue SET name = ?, venue_type = ? WHERE venue_id = ?";
+
+        try {
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setString(1, newName);
+            stmt.setString(2, newType);
+            stmt.setInt(3, venueID);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
      * Attempts to delete a patron from the given venue.
      * @param venueID
      * @param name

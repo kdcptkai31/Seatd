@@ -48,9 +48,9 @@
                   </HBox>
                </children>
             </VBox>
-            <VBox alignment="TOP_CENTER" prefHeight="324.0" prefWidth="125.0" spacing="10.0">
+            <VBox alignment="TOP_CENTER" prefHeight="324.0" prefWidth="137.0" spacing="10.0">
                <children>
-                  <Button mnemonicParsing="false" onMouseClicked="#onDeleteClicked" text="Delete Selected">
+                  <Button mnemonicParsing="false" onMouseClicked="#onDeleteClicked" prefHeight="26.0" prefWidth="98.0" text="Delete Selected">
                      <BorderPane.margin>
                         <Insets top="10.0" />
                      </BorderPane.margin>
@@ -73,6 +73,9 @@
                   </HBox>
                   <Button mnemonicParsing="false" onMouseClicked="#onSavedListClicked" text="Save Move" />
                </children>
+               <HBox.margin>
+                  <Insets right="30.0" />
+               </HBox.margin>
             </VBox>
          </children>
       </HBox>
