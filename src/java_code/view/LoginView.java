@@ -86,6 +86,20 @@ public class LoginView {
                 String type = message.getMessage().getAsJsonObject().get("type").getAsString();//Message type
                 JsonObject data = message.getMessage().getAsJsonObject().get("data").getAsJsonObject();
 
+                if(type.equals("adminLogin") && attemptedUsername.equals(data.get("username").getAsString())){
+
+                    attemptedUsername = "";
+                    Platform.runLater(() -> {
+                        try {
+                            SeatDApplication.getCoordinator().showAdminScene();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+
+                }
+
+
                 if (!Arrays.asList("loggedIn", "badLogin").contains(type))
                     return;
 

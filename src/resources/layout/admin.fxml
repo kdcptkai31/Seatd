@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="java_code.view.AdminView">
+   <top>
+      <Label text="SeatD - Administrator System" textFill="RED" BorderPane.alignment="CENTER">
+         <font>
+            <Font name="Palatino Linotype" size="36.0" />
+         </font>
+      </Label>
+   </top>
+   <center>
+      <HBox alignment="TOP_CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox alignment="TOP_CENTER">
+               <children>
+                  <Label text="Venues">
+                     <font>
+                        <Font name="System Bold" size="18.0" />
+                     </font>
+                  </Label>
+                  <ListView fx:id="venueListView" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#onVenueListClicked" prefHeight="275.0" prefWidth="200.0" />
+               </children>
+            </VBox>
+            <VBox alignment="TOP_CENTER" prefHeight="354.0" prefWidth="149.0" spacing="10.0">
+               <children>
+                  <Label text="Makes Changes">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets top="45.0" />
+                     </VBox.margin>
+                  </Label>
+                  <TextField fx:id="changeNameField" />
+                  <TextField fx:id="changeTypeField">
+                     <VBox.margin>
+                        <Insets top="-5.0" />
+                     </VBox.margin>
+                  </TextField>
+                  <Button mnemonicParsing="false" onMouseClicked="#onSaveChangesClicked" text="Save Changes" />
+               </children></VBox>
+         </children>
+      </HBox>
+   </center>
+   <bottom>
+      <Button mnemonicParsing="false" onMouseClicked="#onLogoutClicked" text="Logout" BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets bottom="10.0" />
+         </BorderPane.margin>
+      </Button>
+   </bottom>
+</BorderPane>

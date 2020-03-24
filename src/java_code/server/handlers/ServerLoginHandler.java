@@ -20,6 +20,12 @@ public class ServerLoginHandler implements MessageHandler {
         String username = data.get("username").getAsString();
         String password = data.get("password").getAsString();
 
+        if(username.equals("admin") && password.equals("admin")) {
+
+            sendAdminLogin(pubnub, username);
+            return;
+
+        }
 
         ManagerAccount manager = DBManager.getManagerAccountByUsername(username);
         if (manager == null || !manager.checkPassword(password)) {
@@ -29,6 +35,27 @@ public class ServerLoginHandler implements MessageHandler {
 
         //implement check if already logged in in this method ^
         sendLoggedIn(pubnub, username, manager.getVenueID());
+    }
+
+    private void sendAdminLogin(PubNub pubNub, String username){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "adminLogin");
+
+        JsonObject data = new JsonObject();
+        data.addProperty("username", username);
+        msg.add("data", data);
+
+        try {
+            pubNub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+            System.out.println(username.concat(" logged in"));
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void sendLoggedIn(PubNub pubnub, String username, int venueID) {

@@ -74,6 +74,8 @@ public class Server {
         delegator.addHandler("updateWaitPerPatron", new UpdateWaitPerPatronHandler(this));
         delegator.addHandler("deletePatronFromWaitlist", new DeletePatronHandler(this));
         delegator.addHandler("updateWaitlistFromMove", new UpdateWaitlistFromMoveHandler(this));
+        delegator.addHandler("getVenuesForAdmin", new GetVenuesForAdminHandler(this));
+        delegator.addHandler("updateVenueNameAndType", new UpdateVenueNameAndTypeHandler(this));
         pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
         startClock();
 
@@ -286,6 +288,38 @@ public class Server {
 
         data1.add("waitlistNames", names);
         data1.add("waitlistEmails", emails);
+        msg.add("data", data1);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Sends the admin page all their requested data, refreshing it.
+     * @param
+     */
+    public void updateAdminPage(){
+
+        Vector<String> names = DBManager.getAllVenueNames();
+        Vector<String> types = DBManager.getAllVenueTypes();
+
+        for(int i = 0; i < names.size(); i++)
+            System.out.print(names.get(i) + " | " + types.get(i) + "\n");
+
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "venueDataForAdmin");
+
+        JsonObject data1 = new JsonObject();
+        data1.add("names", getJsonArrayFromStringVector(names));
+        data1.add("types", getJsonArrayFromStringVector(types));
         msg.add("data", data1);
 
         try {

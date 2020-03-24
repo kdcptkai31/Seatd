@@ -63,6 +63,12 @@ public class SceneCoordinator {
 
     }
 
+    public void showAdminScene() throws IOException{
+
+        window.setScene(new Scene(FXMLLoader.load(new File("src/resources/layout/admin.fxml").toURL())));
+
+    }
+
     /**
      * Closes the application.
      */
