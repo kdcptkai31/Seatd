@@ -152,7 +152,7 @@ public class LoginView {
     public void onCancelClicked(){
 
         try {
-            SeatDApplication.getCoordinator().showVenueScene();
+            SeatDApplication.getCoordinator().showVenueListScene();
         } catch (IOException e) {
             e.printStackTrace();
         }

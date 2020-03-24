@@ -76,6 +76,7 @@ public class Server {
         delegator.addHandler("updateWaitlistFromMove", new UpdateWaitlistFromMoveHandler(this));
         delegator.addHandler("getVenuesForAdmin", new GetVenuesForAdminHandler(this));
         delegator.addHandler("updateVenueNameAndType", new UpdateVenueNameAndTypeHandler(this));
+        delegator.addHandler("getVenueListData", new GetVenueListDataHandler(this));
         pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
         startClock();
 
@@ -310,16 +311,41 @@ public class Server {
         Vector<String> names = DBManager.getAllVenueNames();
         Vector<String> types = DBManager.getAllVenueTypes();
 
-        for(int i = 0; i < names.size(); i++)
-            System.out.print(names.get(i) + " | " + types.get(i) + "\n");
-
-
         JsonObject msg = new JsonObject();
         msg.addProperty("type", "venueDataForAdmin");
 
         JsonObject data1 = new JsonObject();
         data1.add("names", getJsonArrayFromStringVector(names));
         data1.add("types", getJsonArrayFromStringVector(types));
+        msg.add("data", data1);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Sends all needed venue list page data to any open venue lists.
+     */
+    public void updateVenueListData(){
+
+        Vector<String> venueNames = DBManager.getAllVenueNames();
+        Vector<String> venueTypes = DBManager.getAllVenueTypes();
+        Vector<Integer> venueWaits = getCurrentVenueWaits();
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "venueListData");
+
+        JsonObject data1 = new JsonObject();
+        data1.add("names", getJsonArrayFromStringVector(venueNames));
+        data1.add("types", getJsonArrayFromStringVector(venueTypes));
+        data1.add("waits", getJsonArrayFromIntegerVector(venueWaits));
         msg.add("data", data1);
 
         try {

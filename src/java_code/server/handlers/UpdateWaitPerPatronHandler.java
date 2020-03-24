@@ -22,6 +22,9 @@ public class UpdateWaitPerPatronHandler implements MessageHandler {
         if(DBManager.updateVenueWaitPerPatron(venueID, waitPerPatronValue)){
 
             server.updateManagerPage(data);
+            server.updateCurrentVenueData();
+            server.sendUpdateWaitlistData();
+            server.updateVenueListData();
 
         }else{//WaitPerPatron not updated
 

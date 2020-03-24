@@ -388,6 +388,29 @@ public class ServerConnection {
 
     }
 
+    /**
+     * Requests the list of venues and their waittimes from the server.
+     * @param
+     */
+    public void getVenueListData(){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "getVenueListData");
+
+        JsonObject data = new JsonObject();
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public JsonArray getJsonArrayFromStringVector(Vector<String> vector){
 
         JsonArray array = new JsonArray();

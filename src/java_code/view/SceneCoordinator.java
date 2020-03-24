@@ -69,6 +69,12 @@ public class SceneCoordinator {
 
     }
 
+    public void showVenueListScene() throws IOException{
+
+        window.setScene(new Scene(FXMLLoader.load(new File("src/resources/layout/venueList.fxml").toURL())));
+
+    }
+
     /**
      * Closes the application.
      */

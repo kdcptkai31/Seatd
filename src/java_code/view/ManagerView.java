@@ -297,7 +297,7 @@ public class ManagerView {
     public void onLogoutButtonClicked(){
 
         try {
-            SeatDApplication.getCoordinator().showVenueScene();
+            SeatDApplication.getCoordinator().showVenueListScene();
         } catch (IOException e) {
             e.printStackTrace();
         }

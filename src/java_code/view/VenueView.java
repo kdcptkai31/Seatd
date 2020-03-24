@@ -12,6 +12,7 @@ import com.pubnub.api.models.consumer.pubsub.message_actions.PNMessageActionResu
 import com.pubnub.api.models.consumer.pubsub.objects.PNMembershipResult;
 import com.pubnub.api.models.consumer.pubsub.objects.PNSpaceResult;
 import com.pubnub.api.models.consumer.pubsub.objects.PNUserResult;
+import java_code.controller.Controller;
 import java_code.controller.ServerConnection;
 import java_code.model.Patron;
 import javafx.application.Platform;
@@ -44,7 +45,8 @@ public class VenueView {
     private Label errorText;
 
     ServerConnection conn;
-    private int selectedVenue;
+    Controller controller;
+
     private String attemptedWaitlistAdd;
 
     /**
@@ -54,12 +56,9 @@ public class VenueView {
     protected void initialize(){
 
         conn = ServerConnection.getInstance();
+        controller = SeatDApplication.getController();
         SeatDApplication.setToDefaultWindowSize();
         errorText.setVisible(false);
-
-        //SET SELECTED VENUE BASED ON WHAT THEY CLICKED TO GET HERE, THIS IS A PLACEHOLDER*********************
-        selectedVenue = 0;
-
         attemptedWaitlistAdd = "";
 
         registerVenueAllDataListener();
@@ -74,19 +73,6 @@ public class VenueView {
     public void refresh(){conn.refreshWaitListData();}
 
     /**
-     * Loads the login scene.
-     */
-    public void onLoginClicked(){
-
-        try {
-            SeatDApplication.getCoordinator().showLoginScene();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    /**
      * Adds the input information to the waitlist, if it is all there.
      */
     public void onAddToWaitlistClicked(){
@@ -97,7 +83,7 @@ public class VenueView {
 
                 errorText.setVisible(false);
                 attemptedWaitlistAdd = nameField.getText();
-                conn.addToWaitlist(selectedVenue, new Patron(nameField.getText(), emailField.getText()));
+                conn.addToWaitlist(controller.getVenueID(), new Patron(nameField.getText(), emailField.getText()));
 
             }catch (Exception e){
                 e.printStackTrace();
@@ -154,10 +140,10 @@ public class VenueView {
                     }
 
                     Platform.runLater(() -> {
-                        waitTimeLabel.setText(Integer.toString(waitlistTimes.get(selectedVenue)));
-                        waitlistSize.setText(Integer.toString(waitListSizes.get(selectedVenue)));
-                        venueNameLabel.setText(allVenueNames.get(selectedVenue));
-                        venueTypeLabel.setText(allVenueTypes.get(selectedVenue));
+                        waitTimeLabel.setText(Integer.toString(waitlistTimes.get(controller.getVenueID())));
+                        waitlistSize.setText(Integer.toString(waitListSizes.get(controller.getVenueID())));
+                        venueNameLabel.setText(allVenueNames.get(controller.getVenueID()));
+                        venueTypeLabel.setText(allVenueTypes.get(controller.getVenueID()));
 
                     });
 
@@ -232,6 +218,19 @@ public class VenueView {
             @Override
             public void messageAction(@NotNull PubNub pubnub, @NotNull PNMessageActionResult pnMessageActionResult) {}
         });
+
+    }
+
+    /**
+     * Returns the user to the list of venues when they click the "Go Back!" button.
+     */
+    public void onGoBackClicked(){
+
+        try {
+            SeatDApplication.getCoordinator().showVenueListScene();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 

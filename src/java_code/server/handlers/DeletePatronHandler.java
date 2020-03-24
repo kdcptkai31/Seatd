@@ -25,6 +25,7 @@ public class DeletePatronHandler implements MessageHandler {
             server.sendUpdateWaitlistData();
             server.sendUpdateWaitlist(venueID);
             server.updateManagerPage(data);
+            server.updateVenueListData();
 
         }
 

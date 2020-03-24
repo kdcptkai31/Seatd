@@ -15,7 +15,6 @@ import com.pubnub.api.models.consumer.pubsub.objects.PNSpaceResult;
 import com.pubnub.api.models.consumer.pubsub.objects.PNUserResult;
 import java_code.controller.Controller;
 import java_code.controller.ServerConnection;
-import java_code.model.Patron;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,7 +24,6 @@ import javafx.scene.control.TextField;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -179,7 +177,7 @@ public class AdminView {
     public void onLogoutClicked(){
 
         try {
-            SeatDApplication.getCoordinator().showVenueScene();
+            SeatDApplication.getCoordinator().showVenueListScene();
         } catch (IOException e) {
             e.printStackTrace();
         }
