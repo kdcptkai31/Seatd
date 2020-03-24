@@ -7,11 +7,11 @@ import java_code.database.DBManager;
 import java_code.server.MessageHandler;
 import java_code.server.Server;
 
-public class UpdateWaitPerPatron implements MessageHandler {
+public class UpdateWaitPerPatronHandler implements MessageHandler {
 
     Server server;
 
-    public UpdateWaitPerPatron(Server server){this.server = server;}
+    public UpdateWaitPerPatronHandler(Server server){this.server = server;}
 
     @Override
     public void handleMessage(JsonObject data, PubNub pubnub, String clientId) {

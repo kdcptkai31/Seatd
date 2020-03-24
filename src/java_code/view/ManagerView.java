@@ -112,6 +112,8 @@ public class ManagerView {
                         waitlistViewList.add(Integer.toString(i + 1).concat(". ").
                                              concat(waitlistPatrons.get(i).toString()));
 
+                    controller.setTmpWaitlistOrder(waitlistPatrons);
+
                 }else
                     waitlistViewList.add("Nobody is on the waitlist your venue sucks.");
 
@@ -184,6 +186,8 @@ public class ManagerView {
                 waitlistViewList.add(Integer.toString(i + 1).concat(". ").
                         concat(patrons.get(i).toString()));
 
+            controller.setTmpWaitlistOrder(patrons);
+
         }else
             waitlistViewList.add("Nobody is on the waitlist your venue sucks.");
 
@@ -207,6 +211,86 @@ public class ManagerView {
 
     }
 
+    public void onDeleteClicked(){
+
+        if(!waitlistView.getSelectionModel().isEmpty()){
+
+            Patron tmp = getPatronFromStringAr(waitlistView.getSelectionModel().getSelectedItem().split(" | "));
+            conn.deleteWaitListPatron(controller.getVenueID(), tmp.getName(), tmp.getEmail());
+
+        }
+
+    }
+
+    /**
+     * Moves the selected patron down one, if possible, in the temporary list.
+     */
+    public void onDownClicked(){
+
+        if(waitlistView.getSelectionModel().isEmpty())
+            return;
+
+        Patron selected = getPatronFromStringAr(waitlistView.getSelectionModel().getSelectedItem().split(" | "));
+        int selectedIndex = waitlistView.getSelectionModel().getSelectedIndex();
+
+        if(selectedIndex == -1 || selectedIndex == controller.getTmpWaitlistOrder().size())
+            return;
+
+        Patron tmp = controller.getTmpWaitlistOrder().get(selectedIndex + 1);
+        controller.getTmpWaitlistOrder().set(selectedIndex + 1, selected);
+        controller.getTmpWaitlistOrder().set(selectedIndex, tmp);
+
+        waitlistView.getItems().clear();
+        ObservableList<String> waitlistViewList = FXCollections.observableArrayList();
+
+        for(int i = 0; i < controller.getTmpWaitlistOrder().size(); i++)
+            waitlistViewList.add(Integer.toString(i + 1).concat(". ").
+                    concat(controller.getTmpWaitlistOrder().get(i).toString()));
+
+        waitlistView.setItems(waitlistViewList);
+        waitlistView.getSelectionModel().selectIndices(selectedIndex + 1);
+
+    }
+
+    /**
+     * Moves the selected patron up one, if possible, in the temporary list.
+     */
+    public void onUpClicked(){
+
+        if(waitlistView.getSelectionModel().isEmpty())
+            return;
+
+        Patron selected = getPatronFromStringAr(waitlistView.getSelectionModel().getSelectedItem().split(" | "));
+
+        int selectedIndex = waitlistView.getSelectionModel().getSelectedIndex();
+        if(selectedIndex < 1)
+            return;
+
+        Patron tmp = controller.getTmpWaitlistOrder().get(selectedIndex - 1);
+        controller.getTmpWaitlistOrder().set(selectedIndex - 1, selected);
+        controller.getTmpWaitlistOrder().set(selectedIndex, tmp);
+
+        waitlistView.getItems().clear();
+        ObservableList<String> waitlistViewList = FXCollections.observableArrayList();
+
+        for(int i = 0; i < controller.getTmpWaitlistOrder().size(); i++)
+            waitlistViewList.add(Integer.toString(i + 1).concat(". ").
+                    concat(controller.getTmpWaitlistOrder().get(i).toString()));
+
+        waitlistView.setItems(waitlistViewList);
+        waitlistView.getSelectionModel().selectIndices(selectedIndex - 1);
+
+    }
+
+    /**
+     * Saves the temporary list to the database.
+     */
+    public void onSavedListClicked(){
+
+        conn.updateWaitListFromMove(controller.getVenueID(), controller.getTmpWaitlistOrder());
+
+    }
+
     /**
      * Logs the manager out and returns them to the venue scene.
      */
@@ -217,6 +301,33 @@ public class ManagerView {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+    }
+
+    /**
+     * Used to extract a Patron object from the list representation in the manager page, showing the current waitlist.
+     * @param str
+     * @return
+     */
+    private Patron getPatronFromStringAr(String[] str){
+
+        String user_name = "";
+        String email = "";
+        boolean usernameRetieved = false;
+        for(int i = 0; i < str.length; i++) {
+
+            if (i > 0 && !usernameRetieved && !str[i].equals("|"))
+                user_name = user_name.concat( " " + str[i]);
+
+            if(usernameRetieved)
+                email = email.concat(" " + str[i]);
+
+            if(str[i].equals("|"))
+                usernameRetieved = true;
+
+        }
+
+        return new Patron(user_name.trim(), email.trim());
 
     }
 

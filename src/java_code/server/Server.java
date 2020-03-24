@@ -71,7 +71,9 @@ public class Server {
         delegator.addHandler("addWaitlist", new AddWaitlistHandler(this));
         delegator.addHandler("getWaitlistData", new GetWaitlistDataHandler(this));
         delegator.addHandler("getManagerData", new GetManagerDataHandler(this));
-        delegator.addHandler("updateWaitPerPatron", new UpdateWaitPerPatron(this));
+        delegator.addHandler("updateWaitPerPatron", new UpdateWaitPerPatronHandler(this));
+        delegator.addHandler("deletePatronFromWaitlist", new DeletePatronHandler(this));
+        delegator.addHandler("updateWaitlistFromMove", new UpdateWaitlistFromMoveHandler(this));
         pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
         startClock();
 

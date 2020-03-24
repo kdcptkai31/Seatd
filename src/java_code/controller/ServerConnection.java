@@ -1,5 +1,6 @@
 package java_code.controller;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.pubnub.api.PNConfiguration;
 import com.pubnub.api.PubNub;
@@ -19,7 +20,9 @@ import java_code.model.Patron;
 import java_code.server.MessageDelegator;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Vector;
 
 /**
  * Singleton Class that represents the client's connection to the server via PubNub.
@@ -268,6 +271,80 @@ public class ServerConnection {
         } catch (PubNubException e) {
             e.printStackTrace();
         }
+
+    }
+
+    /**
+     * Sends a message to delete a Patron from a specific venue's waitlist.
+     * @param venueID
+     * @param user_name
+     * @param email
+     */
+    public void deleteWaitListPatron(int venueID, String user_name, String email){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "deletePatronFromWaitlist");
+
+        JsonObject data = new JsonObject();
+        data.addProperty("venueID", venueID);
+        data.addProperty("user_name", user_name);
+        data.addProperty("email", email);
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Sends the updated list for a venue to the server.
+     * @param venueID
+     * @param list
+     */
+    public void updateWaitListFromMove(int venueID, ArrayList<Patron> list){
+
+        Vector<String> names = new Vector<>();
+        Vector<String> emails = new Vector<>();
+        for(int i = 0; i < list.size(); i++){
+
+            names.add(list.get(i).getName().trim());
+            emails.add(list.get(i).getEmail().trim());
+
+        }
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "updateWaitlistFromMove");
+
+        JsonObject data = new JsonObject();
+        data.addProperty("venueID", venueID);
+        data.add("names", getJsonArrayFromStringVector(names));
+        data.add("emails", getJsonArrayFromStringVector(emails));
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public JsonArray getJsonArrayFromStringVector(Vector<String> vector){
+
+        JsonArray array = new JsonArray();
+        for(int i = 0; i < vector.size(); i++)
+            array.add(vector.get(i));
+
+        return array;
 
     }
 

@@ -4,6 +4,7 @@ import java_code.model.ManagerAccount;
 import java_code.model.Patron;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Vector;
 
 /**
@@ -382,6 +383,63 @@ public class DBManager {
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
+        }
+
+    }
+
+    /**
+     * Attempts to delete a patron from the given venue.
+     * @param venueID
+     * @param name
+     * @param email
+     * @return
+     */
+    public static boolean deletePatronFromVenueWaitlist(int venueID, String name, String email){
+
+        String sql = "DELETE FROM waitlist WHERE cor_venue_id = ? AND user_name = ? AND email = ?";
+
+        try {
+            PreparedStatement stmt2 = connection.prepareStatement(sql);
+            stmt2.setInt(1, venueID);
+            stmt2.setString(2, name);
+            stmt2.setString(3, email);
+            stmt2.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    /**
+     * Sets the waitlist for a given venue.
+     * @param venueID
+     * @param list
+     */
+    public static void setWaitlistForVenue(int venueID, ArrayList<Patron> list){
+
+        String sql = "DELETE FROM waitlist WHERE cor_venue_id = ?";
+
+        try{
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, venueID);
+            stmt.executeUpdate();
+
+            for(int i = 0; i < list.size(); i++){
+
+                String string = "INSERT INTO waitlist(cor_venue_id, user_name, email) VALUES(?, ?, ?)";
+
+                PreparedStatement statement = connection.prepareStatement(string);
+                statement.setInt(1, venueID);
+                statement.setString(2, list.get(i).getName());
+                statement.setString(3, list.get(i).getEmail());
+                statement.executeUpdate();
+
+            }
+
+        }catch (SQLException e){
+            e.printStackTrace();
         }
 
     }
