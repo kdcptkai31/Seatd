@@ -107,21 +107,47 @@ public class VenueListView {
                 ObservableList<String> venueViewList = FXCollections.observableArrayList();
                 if(!vectorNames.isEmpty()){
 
+                    Vector<String> finalListStrings = new Vector<>();
+                    for(int i = 0; i < vectorNames.size(); i++) {
+                        finalListStrings.add(vectorNames.get(i).concat(" | ").concat(vectorTypes.get(i).
+                                concat(" | WaitTime: ").concat(String.valueOf(vectorWaits.get(i)))));
+                    }
+
                     switch (sortBox.getSelectionModel().getSelectedIndex()){
 
+                        //Sorts alphabetically
                         case 0:
-                            for(int i = 0; i < vectorNames.size(); i++) {
-                                vectorNames.setElementAt(vectorNames.get(i).concat(" | ").concat(vectorTypes.get(i).
-                                        concat(" | WaitTime: ").concat(String.valueOf(vectorWaits.get(i)))) ,i);
-                            }
-                            Collections.sort(vectorNames);
-                            for(int i = 0; i < vectorNames.size(); i++)
-                                venueViewList.add(vectorNames.get(i));
+                            Collections.sort(finalListStrings);
                             break;
-                        case 1: System.out.print("ERROR");
+
+                        //Sorts by shortest waittime
+                        case 1:
+                            for(int i = 0; i < finalListStrings.size(); i++){
+
+                                for(int j = i + 1; j < finalListStrings.size(); j++){
+
+                                    if(vectorWaits.get(i) > vectorWaits.get(j)){
+
+                                        int tmpInt = vectorWaits.get(i);
+                                        vectorWaits.setElementAt(vectorWaits.get(j), i);
+                                        vectorWaits.setElementAt(tmpInt, j);
+
+                                        String tmpStr = finalListStrings.get(i);
+                                        finalListStrings.setElementAt(finalListStrings.get(j), i);
+                                        finalListStrings.setElementAt(tmpStr, j);
+
+                                    }
+
+                                }
+
+                            }
+
                             break;
 
                     }
+
+                    for(int i = 0; i < vectorNames.size(); i++)
+                        venueViewList.add(finalListStrings.get(i));
 
                 }else
                     venueViewList.add("NO VENUES FOUND");
@@ -147,6 +173,10 @@ public class VenueListView {
         });
 
     }
+
+    public void onSortMethodChanged(){
+        System.out.println("RUNS");
+        conn.getVenueListData();}
 
     /**
      * Brings the user to the login page.

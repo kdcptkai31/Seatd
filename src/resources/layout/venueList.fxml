@@ -24,7 +24,7 @@
                   <Insets left="250.0" top="20.0" />
                </VBox.margin>
             </Button>
-            <ComboBox fx:id="sortBox" prefHeight="26.0" prefWidth="118.0" promptText="Sort Method" visibleRowCount="2">
+            <ComboBox fx:id="sortBox" onAction="#onSortMethodChanged" prefHeight="26.0" prefWidth="118.0" promptText="Sort Method" visibleRowCount="2">
                <VBox.margin>
                   <Insets top="85.0" />
                </VBox.margin>
