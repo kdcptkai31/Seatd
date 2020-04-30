@@ -12,6 +12,7 @@ import com.pubnub.api.models.consumer.pubsub.message_actions.PNMessageActionResu
 import com.pubnub.api.models.consumer.pubsub.objects.PNMembershipResult;
 import com.pubnub.api.models.consumer.pubsub.objects.PNSpaceResult;
 import com.pubnub.api.models.consumer.pubsub.objects.PNUserResult;
+import com.sun.mail.smtp.SMTPTransport;
 import java_code.controller.Controller;
 import java_code.controller.ServerConnection;
 import java_code.model.Patron;
@@ -22,10 +23,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import org.jetbrains.annotations.NotNull;
 
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.*;
 
 public class VenueView {
 
@@ -43,6 +47,8 @@ public class VenueView {
     private TextField emailField;
     @FXML
     private Label errorText;
+    @FXML
+    private Label processingLabel;
 
     ServerConnection conn;
     Controller controller;
@@ -59,6 +65,7 @@ public class VenueView {
         controller = SeatDApplication.getController();
         SeatDApplication.setToDefaultWindowSize();
         errorText.setVisible(false);
+        processingLabel.setVisible(false);
         attemptedWaitlistAdd = "";
 
         registerVenueAllDataListener();
@@ -82,6 +89,7 @@ public class VenueView {
             try{
 
                 errorText.setVisible(false);
+                processingLabel.setVisible(true);
                 attemptedWaitlistAdd = nameField.getText();
                 conn.addToWaitlist(controller.getVenueID(), new Patron(nameField.getText(), emailField.getText()));
 
@@ -93,6 +101,7 @@ public class VenueView {
 
             errorText.setText("***missing credentials***");
             errorText.setVisible(true);
+            processingLabel.setVisible(false);
 
         }
 
@@ -144,6 +153,10 @@ public class VenueView {
                         waitlistSize.setText(Integer.toString(waitListSizes.get(controller.getVenueID())));
                         venueNameLabel.setText(allVenueNames.get(controller.getVenueID()));
                         venueTypeLabel.setText(allVenueTypes.get(controller.getVenueID()));
+                        if(!controller.tmpEmail.equals(""))
+                            sendEmail(controller.tmpEmail);
+                        controller.tmpEmail = "";
+                        processingLabel.setVisible(false);
 
                     });
 
@@ -188,6 +201,7 @@ public class VenueView {
 
                 if(type.equals("goodWaitlistAdd")){
 
+                    controller.tmpEmail = emailField.getText();
                     attemptedWaitlistAdd = "";
                     nameField.clear();
                     emailField.clear();
@@ -197,6 +211,7 @@ public class VenueView {
                 if(type.equals("badWaitlistAdd")){
 
                     Platform.runLater(() -> {
+                        processingLabel.setVisible(false);
                         errorText.setText("***error-waitlist addition failed***");
                         errorText.setVisible(true);
                     });
@@ -229,6 +244,54 @@ public class VenueView {
         try {
             SeatDApplication.getCoordinator().showVenueListScene();
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Sends the user a verification email that they have been added to the waitlist with the current waittime.
+     * @param email
+     */
+    private void sendEmail(String email){
+
+        // Setup mail server
+        Properties prop = System.getProperties();
+        prop.put("mail.smtp.host", "smtp-relay.sendinblue.com"); //optional, defined in SMTPTransport
+        prop.put("mail.smtp.auth", "true");
+        prop.put("mail.smtp.port", "587"); // default port 25
+
+        Session session = Session.getInstance(prop, null);
+        Message msg = new MimeMessage(session);
+        try {
+
+            // from
+            msg.setFrom(new InternetAddress("services@SeatD.com"));
+
+            // to
+            msg.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
+
+            // subject
+            msg.setSubject("SeatD - Added to " + venueNameLabel.getText() + " Waitlist");
+
+            // content
+            msg.setText("Reminder that you are on the " + venueNameLabel.getText() + " waitlist, your current wait " +
+                        "time is " + waitTimeLabel.getText() + " minutes.\nYou will receive another email once your " +
+                        "table is ready!\n\n - SeatD Admins");
+
+            //Date
+            msg.setSentDate(new Date());
+
+            //Send Email
+            SMTPTransport t = (SMTPTransport) session.getTransport("smtp");
+            // connect
+            t.connect("smtp-relay.sendinblue.com", "kdcptkai31@gmail.com", "N06pBhOgJ3RtCLrc");
+            // send
+            t.sendMessage(msg, msg.getAllRecipients());
+            System.out.println("Response: " + t.getLastServerResponse());
+            t.close();
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
