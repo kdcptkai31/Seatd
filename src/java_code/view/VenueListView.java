@@ -54,6 +54,7 @@ public class VenueListView {
         ObservableList<String> sortBoxOptions = FXCollections.observableArrayList();
         sortBoxOptions.add("Alphabetical");
         sortBoxOptions.add("Shortest Wait");
+        sortBoxOptions.add("Most Popular");
         sortBox.setItems(sortBoxOptions);
         sortBox.getSelectionModel().selectFirst();
 
@@ -137,10 +138,31 @@ public class VenueListView {
                                         finalListStrings.setElementAt(tmpStr, j);
 
                                     }
-
                                 }
-
                             }
+
+                            break;
+
+                        //Sorts by most popular
+                        case 2:
+                            for(int i = 0; i < finalListStrings.size(); i++){
+
+                                for(int j = i + 1; j < finalListStrings.size(); j++){
+
+                                    if(vectorWaits.get(i) > vectorWaits.get(j)){
+
+                                        int tmpInt = vectorWaits.get(i);
+                                        vectorWaits.setElementAt(vectorWaits.get(j), i);
+                                        vectorWaits.setElementAt(tmpInt, j);
+
+                                        String tmpStr = finalListStrings.get(i);
+                                        finalListStrings.setElementAt(finalListStrings.get(j), i);
+                                        finalListStrings.setElementAt(tmpStr, j);
+
+                                    }
+                                }
+                            }
+                            Collections.reverse(finalListStrings);
 
                             break;
 
