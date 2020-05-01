@@ -39,6 +39,8 @@ public class AdminView {
     private TextField changeNameField;
     @FXML
     private TextField changeTypeField;
+    @FXML
+    private TextField managerUsernameField;
 
     /**
      * Initializes the scene.
@@ -55,8 +57,10 @@ public class AdminView {
         venueListView.setFocusTraversable(false);
         changeNameField.setFocusTraversable(false);
         changeTypeField.setFocusTraversable(false);
+        managerUsernameField.setFocusTraversable(false);
         changeNameField.setPromptText("select a venue");
         changeTypeField.setPromptText("select a venue");
+        managerUsernameField.setPromptText("select a venue");
 
     }
 
@@ -81,27 +85,36 @@ public class AdminView {
                 JsonObject data = message.getMessage().getAsJsonObject().get("data").getAsJsonObject();
                 JsonArray names = data.get("names").getAsJsonArray();
                 JsonArray types = data.get("types").getAsJsonArray();
+                JsonArray usernames = data.get("usernames").getAsJsonArray();
                 Iterator<JsonElement> nameElement = names.iterator();
                 Iterator<JsonElement> typeElement = types.iterator();
+                Iterator<JsonElement> usernameElement = usernames.iterator();
                 ObservableList<String> venueViewList = FXCollections.observableArrayList();
                 Vector<String> vectorNames = new Vector<>();
                 Vector<String> vectorTypes = new Vector<>();
+                Vector<String> vectorUsernames = new Vector<>();
 
                 while(nameElement.hasNext() && typeElement.hasNext()){
 
                     String tmpName = nameElement.next().getAsString();
                     String tmpType = typeElement.next().getAsString();
+                    String tmpUsername = usernameElement.next().getAsString();
                     vectorNames.add(tmpName);
                     vectorTypes.add(tmpType);
+                    vectorUsernames.add(tmpUsername);
                     venueViewList.add(tmpName.concat(" | ").concat(tmpType));
 
                 }
 
                 controller.setVenueNames(vectorNames);
                 controller.setVenueTypes(vectorTypes);
+                controller.setManagerUsernames(vectorUsernames);
 
                 Platform.runLater(()->{
                     venueListView.setItems(venueViewList);
+                    changeNameField.setPromptText("select a venue");
+                    changeTypeField.setPromptText("select a venue");
+                    managerUsernameField.setPromptText("select a venue");
                 });
 
             }
@@ -132,6 +145,7 @@ public class AdminView {
         int selectedIndex = venueListView.getSelectionModel().getSelectedIndex();
         changeNameField.setPromptText(controller.getVenueNames().get(selectedIndex));
         changeTypeField.setPromptText(controller.getVenueTypes().get(selectedIndex));
+        managerUsernameField.setPromptText(controller.getManagerUsernames().get(selectedIndex));
 
     }
 
@@ -168,6 +182,17 @@ public class AdminView {
         venueListView.getSelectionModel().clearSelection();
         changeNameField.clear();
         changeTypeField.clear();
+
+    }
+
+    public void onChangeUsernameClicked(){
+
+        if(managerUsernameField.getText().isEmpty())
+            return;
+
+        conn.updateManagerUsername(venueListView.getSelectionModel().getSelectedIndex(), managerUsernameField.getText());
+        venueListView.getSelectionModel().clearSelection();
+        managerUsernameField.clear();
 
     }
 

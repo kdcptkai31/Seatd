@@ -23,6 +23,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,6 +44,14 @@ public class ManagerView {
     private TextField waitPerPatronField;
     @FXML
     private Label totalWaitTimeLabel;
+    @FXML
+    private TextField newUsernameField;
+    @FXML
+    private PasswordField newPasswordField;
+    @FXML
+    private PasswordField passwordVerificationField;
+    @FXML
+    private Label errorText;
 
     /**
      * Initializes the scene.
@@ -56,6 +65,7 @@ public class ManagerView {
         registerManagerPageDataListener();
         conn.getManagerPageData(controller.getVenueID());
         waitPerPatronField.setFocusTraversable(false);
+        errorText.setVisible(false);
 
     }
 
@@ -119,6 +129,9 @@ public class ManagerView {
 
                 Platform.runLater(()->{waitlistView.setItems(waitlistViewList);});
 
+                controller.setManagerUsername(data.get("username").getAsString());
+                controller.setManagerPassword(data.get("password").getAsString());
+
                 conn.refreshWaitListData();
 
                 //Run Extraction
@@ -126,6 +139,9 @@ public class ManagerView {
                     totalWaitTimeLabel.setText(String.valueOf(data.get("waitPerPatron").getAsInt() * waitlistPatrons.size()));
                     venueNameLabel.setText(data.get("name").getAsString());
                     waitPerPatronField.setPromptText(data.get("waitPerPatron").getAsString());
+                    newUsernameField.setPromptText(controller.getManagerUsername());
+                    newPasswordField.setPromptText(controller.getManagerPassword());
+                    passwordVerificationField.setPromptText("Rewrite New Password");
                 });
 
             }
@@ -288,6 +304,53 @@ public class ManagerView {
     public void onSavedListClicked(){
 
         conn.updateWaitListFromMove(controller.getVenueID(), controller.getTmpWaitlistOrder());
+
+    }
+
+    /**
+     * Updates the manager's username and/or password
+     */
+    public void onSaveChangesClicked(){
+
+        //No new info present
+        if(newUsernameField.getText().isEmpty() && newPasswordField.getText().isEmpty())
+            return;
+
+        //All new info present, passwords match
+        if(!newUsernameField.getText().isEmpty() && !newPasswordField.getText().isEmpty() &&
+                newPasswordField.getText().equals(passwordVerificationField.getText())){
+
+            conn.updateManagerInfo(controller.getVenueID(), newUsernameField.getText(), newPasswordField.getText());
+            newUsernameField.clear();
+            newPasswordField.clear();
+            passwordVerificationField.clear();
+            errorText.setVisible(false);
+            return;
+
+        }
+
+        //New passwords present and match
+        if(newUsernameField.getText().isEmpty() && newPasswordField.getText().equals(passwordVerificationField.getText())){
+
+            conn.updateManagerInfo(controller.getVenueID(), controller.getManagerUsername(), newPasswordField.getText());
+            newPasswordField.clear();
+            passwordVerificationField.clear();
+            errorText.setVisible(false);
+            return;
+
+        }
+
+        //New username present
+        if(!newUsernameField.getText().isEmpty() && newPasswordField.getText().isEmpty() && passwordVerificationField.getText().isEmpty()){
+
+            conn.updateManagerUsername(controller.getVenueID(), newUsernameField.getText());
+            newUsernameField.clear();
+            errorText.setVisible(false);
+            return;
+
+        }
+
+        errorText.setVisible(true);
 
     }
 

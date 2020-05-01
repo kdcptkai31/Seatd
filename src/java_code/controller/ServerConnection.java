@@ -389,6 +389,60 @@ public class ServerConnection {
     }
 
     /**
+     * Sends a message to the server to change the manager username.
+     * @param venueID
+     * @param newUsername
+     */
+    public void updateManagerUsername(int venueID, String newUsername){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "updateManagerUsername");
+
+        JsonObject data = new JsonObject();
+        data.addProperty("venueID", venueID);
+        data.addProperty("newUsername", newUsername);
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Sends a message to the server to change the manager username and password.
+     * @param venueID
+     * @param newUsername
+     * @param newPassword
+     */
+    public void updateManagerInfo(int venueID, String newUsername, String newPassword){
+
+        JsonObject msg = new JsonObject();
+        msg.addProperty("type", "updateManagerInfo");
+
+        JsonObject data = new JsonObject();
+        data.addProperty("venueID", venueID);
+        data.addProperty("newUsername", newUsername);
+        data.addProperty("newPassword", newPassword);
+        msg.add("data", data);
+
+        try {
+            pubnub.publish()
+                    .channel("main")
+                    .message(msg)
+                    .sync();
+        } catch (PubNubException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
      * Requests the list of venues and their waittimes from the server.
      * @param
      */
