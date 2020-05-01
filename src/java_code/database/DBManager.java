@@ -1,10 +1,17 @@
 package java_code.database;
 
+import com.sun.mail.smtp.SMTPTransport;
 import java_code.model.ManagerAccount;
 import java_code.model.Patron;
 
+import javax.mail.Message;
+import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Properties;
 import java.util.Vector;
 
 /**
@@ -208,13 +215,14 @@ public class DBManager {
     }
 
     /**
-     * Removes the first instance of a patron on the waitlist, effectively "serving" them.
+     * Removes the first instance of a patron on the waitlist and sends them an email, effectively "serving" them.
      * @param venueID
      */
     public static void servePatron(int venueID){
 
         String sql = "SELECT * FROM waitlist WHERE cor_venue_id = ? LIMIT 1;";
         String sql2 = "DELETE FROM waitlist WHERE cor_venue_id = ? AND user_name = ? AND email = ?;";
+        String sq123 = "SELECT name FROM venue WHERE venue_id = ?";
         try{
             //Gets the person on the top of the waitlist.
             PreparedStatement stmt = connection.prepareStatement(sql);
@@ -222,6 +230,7 @@ public class DBManager {
             ResultSet rs = stmt.executeQuery();
             rs.next();
             Patron tmp = new Patron(rs.getString("user_name"), rs.getString("email"));
+            int tmpVenueId = rs.getInt("cor_venue_id");
             rs.close();
 
             //Deletes the person on top of the waitlist.s
@@ -230,6 +239,16 @@ public class DBManager {
             stmt2.setString(2, tmp.getName());
             stmt2.setString(3, tmp.getEmail());
             stmt2.executeUpdate();
+
+            //Finds the venue name from the given venue id
+            PreparedStatement stmt3 = connection.prepareStatement(sq123);
+            stmt3.setInt(1, tmpVenueId);
+            ResultSet rs3 = stmt3.executeQuery();
+            rs3.next();
+            String tmpVenueName = rs3.getString("name");
+            System.out.println(tmpVenueName);
+            sendEmail(tmp, tmpVenueName);
+            rs3.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -461,6 +480,54 @@ public class DBManager {
             }
 
         }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Sends an email to the patron who just got served, notifying them that their table is ready.
+     * @param patron
+     */
+    private static void sendEmail(Patron patron, String venueName){
+
+        // Setup mail server
+        Properties prop = System.getProperties();
+        prop.put("mail.smtp.host", "smtp-relay.sendinblue.com"); //optional, defined in SMTPTransport
+        prop.put("mail.smtp.auth", "true");
+        prop.put("mail.smtp.port", "587"); // default port 25
+
+        Session session = Session.getInstance(prop, null);
+        Message msg = new MimeMessage(session);
+        try {
+
+            // from
+            msg.setFrom(new InternetAddress("services@SeatD.com"));
+
+            // to
+            msg.addRecipient(Message.RecipientType.TO, new InternetAddress(patron.getEmail()));
+
+            // subject
+            msg.setSubject("SeatD - Your Table at " + venueName + " is Ready!");
+
+            // content
+            msg.setText("Hello ".concat(patron.getName()).concat(",\n\n" + "Your table at ").
+                    concat(venueName).concat(" is ready. Please confirm with the host within 15 minutes you may lose ").
+                    concat("your reservation. Thank you for using SeatD,\n\n - SeatD Admins"));
+
+            //Date
+            msg.setSentDate(new Date());
+
+            //Send Email
+            SMTPTransport t = (SMTPTransport) session.getTransport("smtp");
+            // connect
+            t.connect("smtp-relay.sendinblue.com", "kdcptkai31@gmail.com", "N06pBhOgJ3RtCLrc");
+            // send
+            t.sendMessage(msg, msg.getAllRecipients());
+            System.out.println("Response: " + t.getLastServerResponse());
+            t.close();
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

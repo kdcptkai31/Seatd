@@ -154,7 +154,8 @@ public class VenueView {
                         venueNameLabel.setText(allVenueNames.get(controller.getVenueID()));
                         venueTypeLabel.setText(allVenueTypes.get(controller.getVenueID()));
                         if(!controller.tmpEmail.equals(""))
-                            sendEmail(controller.tmpEmail);
+                            sendEmail();
+                        controller.tmpName = "";
                         controller.tmpEmail = "";
                         processingLabel.setVisible(false);
 
@@ -201,6 +202,7 @@ public class VenueView {
 
                 if(type.equals("goodWaitlistAdd")){
 
+                    controller.tmpName = nameField.getText();
                     controller.tmpEmail = emailField.getText();
                     attemptedWaitlistAdd = "";
                     nameField.clear();
@@ -251,9 +253,9 @@ public class VenueView {
 
     /**
      * Sends the user a verification email that they have been added to the waitlist with the current waittime.
-     * @param email
+     * @param
      */
-    private void sendEmail(String email){
+    private void sendEmail(){
 
         // Setup mail server
         Properties prop = System.getProperties();
@@ -269,15 +271,17 @@ public class VenueView {
             msg.setFrom(new InternetAddress("services@SeatD.com"));
 
             // to
-            msg.addRecipient(Message.RecipientType.TO, new InternetAddress(email));
+            msg.addRecipient(Message.RecipientType.TO, new InternetAddress(controller.tmpEmail));
 
             // subject
             msg.setSubject("SeatD - Added to " + venueNameLabel.getText() + " Waitlist");
 
             // content
-            msg.setText("Reminder that you are on the " + venueNameLabel.getText() + " waitlist, your current wait " +
-                        "time is " + waitTimeLabel.getText() + " minutes.\nYou will receive another email once your " +
-                        "table is ready!\n\n - SeatD Admins");
+            msg.setText("Hello ".concat(controller.tmpName).concat(",\n\n" + "Reminder that you are on the ").
+                        concat(venueNameLabel.getText()).concat(" waitlist, your current wait time is ").
+                        concat(waitTimeLabel.getText()).concat(" minutes.\nYou will receive another email once your ").
+                            concat("table is ready!\n\n - SeatD Admins")
+                        );
 
             //Date
             msg.setSentDate(new Date());

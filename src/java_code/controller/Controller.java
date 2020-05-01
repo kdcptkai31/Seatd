@@ -12,6 +12,7 @@ public class Controller {
 
     //Used for everyone
     private int venueID;
+    public String tmpName;
     public String tmpEmail;
 
     //Used for managers
@@ -28,6 +29,7 @@ public class Controller {
     public Controller(){
 
         managerUsername = "";
+        tmpName = "";
         tmpEmail = "";
         tmpWaitlistOrder = new ArrayList<>();
         venueNames = new Vector<>();
