@@ -17,6 +17,7 @@ public class Controller {
 
     //Used for managers
     private String managerUsername;
+    private String managerPassword;
     private ArrayList<Patron> tmpWaitlistOrder;
 
     //Used for admins
@@ -30,6 +31,7 @@ public class Controller {
     public Controller(){
 
         managerUsername = "";
+        managerPassword = "";
         tmpName = "";
         tmpEmail = "";
         tmpWaitlistOrder = new ArrayList<>();
@@ -41,6 +43,7 @@ public class Controller {
 
     //Getters
     public String getManagerUsername() {return managerUsername;}
+    public String getManagerPassword() { return managerPassword; }
     public int getVenueID(){return venueID;}
     public ArrayList<Patron> getTmpWaitlistOrder(){return tmpWaitlistOrder;}
     public Vector<String> getVenueNames(){return venueNames;}
@@ -49,6 +52,7 @@ public class Controller {
 
     //Setters
     public void setManagerUsername(String managerUsername){this.managerUsername = managerUsername;}
+    public void setManagerPassword(String managerPassword) { this.managerPassword = managerPassword; }
     public void setVenueID(int i){venueID = i;}
     public void setTmpWaitlistOrder(ArrayList<Patron> vector){tmpWaitlistOrder = vector;}
     public void setVenueNames(Vector<String> venueNames) {this.venueNames = venueNames;}

@@ -350,6 +350,35 @@ public class DBManager {
     }
 
     /**
+     * Returns the given venue's manager's username and password.
+     * @param venueID
+     * @return
+     */
+    public static Vector<String> getManagerInfo(int venueID){
+
+        String sql = "SELECT username, password FROM manager_account WHERE venue_id = ?";
+
+        try{
+
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, venueID);
+            ResultSet rs = stmt.executeQuery();
+            rs.next();
+            Vector<String> tmp = new Vector<>();
+            tmp.add(rs.getString("username"));
+            tmp.add(rs.getString("password"));
+            rs.close();
+            return tmp;
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
+    /**
      * Returns the name and wait per patron value for the given venueID.
      * @param venueID
      * @return
@@ -450,6 +479,11 @@ public class DBManager {
 
     }
 
+    /**
+     * Updates the manager's username.
+     * @param venueID
+     * @param newUsername
+     */
     public static void updateManagerUsername(int venueID, String newUsername){
 
         String sql = "UPDATE manager_account SET username = ? WHERE venue_id = ?";
@@ -458,6 +492,28 @@ public class DBManager {
 
             PreparedStatement stmt = connection.prepareStatement(sql);
             stmt.setString(1, newUsername);
+            stmt.setInt(2, venueID);
+            stmt.executeUpdate();
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Updates the manager's username.
+     * @param venueID
+     * @param newPassword
+     */
+    public static void updateManagerPassword(int venueID, String newPassword){
+
+        String sql = "UPDATE manager_account SET password = ? WHERE venue_id = ?";
+
+        try{
+
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setString(1, newPassword);
             stmt.setInt(2, venueID);
             stmt.executeUpdate();
 

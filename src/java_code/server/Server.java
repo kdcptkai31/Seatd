@@ -78,6 +78,7 @@ public class Server {
         delegator.addHandler("updateVenueNameAndType", new UpdateVenueNameAndTypeHandler(this));
         delegator.addHandler("getVenueListData", new GetVenueListDataHandler(this));
         delegator.addHandler("updateManagerUsername", new UpdateManagerUsernameHandler(this));
+        delegator.addHandler("updateManagerInfo", new UpdateManagerInfoHandler(this));
         pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
         startClock();
 
@@ -269,8 +270,9 @@ public class Server {
         int venueID = data.get("venueID").getAsInt();
         Vector<String> nameAndWaitPerPatron = DBManager.getVenueNameAndWaitPerPatron(venueID);
         Vector<Patron> waitlistPatrons = DBManager.getWaitlistFromVenueID(venueID);
+        Vector<String> managerInfo = DBManager.getManagerInfo(venueID);
 
-        if(nameAndWaitPerPatron == null || waitlistPatrons == null)
+        if(nameAndWaitPerPatron == null || waitlistPatrons == null || managerInfo == null)
             return;
 
         JsonObject msg = new JsonObject();
@@ -290,6 +292,8 @@ public class Server {
 
         data1.add("waitlistNames", names);
         data1.add("waitlistEmails", emails);
+        data1.addProperty("username", managerInfo.get(0));
+        data1.addProperty("password", managerInfo.get(1));
         msg.add("data", data1);
 
         try {
