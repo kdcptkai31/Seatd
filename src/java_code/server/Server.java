@@ -77,6 +77,7 @@ public class Server {
         delegator.addHandler("getVenuesForAdmin", new GetVenuesForAdminHandler(this));
         delegator.addHandler("updateVenueNameAndType", new UpdateVenueNameAndTypeHandler(this));
         delegator.addHandler("getVenueListData", new GetVenueListDataHandler(this));
+        delegator.addHandler("updateManagerUsername", new UpdateManagerUsernameHandler(this));
         pubnub.subscribe().channels(Arrays.asList("main")).withPresence().execute();
         startClock();
 
@@ -310,6 +311,7 @@ public class Server {
 
         Vector<String> names = DBManager.getAllVenueNames();
         Vector<String> types = DBManager.getAllVenueTypes();
+        Vector<String> usernames = DBManager.getAllManagerUsernames();
 
         JsonObject msg = new JsonObject();
         msg.addProperty("type", "venueDataForAdmin");
@@ -317,6 +319,7 @@ public class Server {
         JsonObject data1 = new JsonObject();
         data1.add("names", getJsonArrayFromStringVector(names));
         data1.add("types", getJsonArrayFromStringVector(types));
+        data1.add("usernames", getJsonArrayFromStringVector(usernames));
         msg.add("data", data1);
 
         try {

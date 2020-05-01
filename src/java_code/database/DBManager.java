@@ -327,6 +327,28 @@ public class DBManager {
 
     }
 
+    public static Vector<String> getAllManagerUsernames(){
+
+        String sql = "SELECT username FROM manager_account";
+
+        try{
+
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            Vector<String> tmp = new Vector<>();
+            while(rs.next())
+                tmp.add(rs.getString("username"));
+
+            return tmp;
+
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
+
+        return null;
+
+    }
+
     /**
      * Returns the name and wait per patron value for the given venueID.
      * @param venueID
@@ -423,6 +445,23 @@ public class DBManager {
             stmt.setInt(3, venueID);
             stmt.executeUpdate();
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void updateManagerUsername(int venueID, String newUsername){
+
+        String sql = "UPDATE manager_account SET username = ? WHERE venue_id = ?";
+
+        try{
+
+            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt.setString(1, newUsername);
+            stmt.setInt(2, venueID);
+            stmt.executeUpdate();
+
+        }catch(SQLException e){
             e.printStackTrace();
         }
 
